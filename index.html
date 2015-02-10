@@ -3,22 +3,64 @@
     <head>
         <meta charset="utf-8"/>
         <title>Test github.io</title>
+        <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
         <script type="text/javascript">
-            function draw(){
-                var canvas = document.getElementById("drawCanvas");
-                if(canvas.getContext){
-                    var ctx = canvas.getContext("2d");
-                    
-                    ctx.fillStyle = "rgb(200,0,0)";
-                    ctx.fillRect(10,10,55,50);
-                    ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
-                    ctx.fillRect(30,30,55,50);
-                }
+            
+            var stage, circle, circle1;
+            
+            function init(){
+                stage = new createjs.Stage("gameCanvas");
+                circle = new createjs.Shape();
+                circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
+                circle.x = 100;
+                circle.y = 100;
+                stage.addChild(circle);
+                
+                circle1 = new createjs.Shape();
+                circle1.graphics.beginFill("red").drawCircle(0, 0, 40);
+                circle1.x = 100;
+                circle1.y = 300;
+                stage.addChild(circle1);
+                
+                circle.on('pressmove', handlePressMove);
+                circle.on('pressup', handlePressUp);
+                
+                createjs.Ticker.on("tick", tick);
+                createjs.Ticker.setFPS(30);
             }
+            
+            function handlePressMove(evt) {
+                evt.target.x = evt.stageX;
+                evt.target.y = evt.stageY;
+                console.log('pressmove');
+            }
+            
+            function handlePressUp(evt) {
+                console.log('pressup');
+            }
+            
+            function tick(event) {
+                
+                circle.x = circle.x + (event.delta) / 1000 * 100;
+                if( circle.x > stage.canvas.width ) {
+                    circle.x = 0;
+                }
+                
+                circle1.x = circle1.x + (event.delta) / 1000 * 200;
+                if( circle1.x > stage.canvas.width ) {
+                    circle1.x = 0;
+                }
+                circle1.y = circle1.y - (event.delta) / 1000 * 50;
+                if( circle1.y < 0 ) {
+                    circle1.y = stage.canvas.height;
+                }
+                stage.update(event);
+            }
+            
         </script>
     </head>
-    <body onload="draw();">
+    <body onload="init();">
         <p>Just a simple test page</p>
-        <canvas id="drawCanvas" width="300" height="300"></canvas>
+        <canvas id="gameCanvas" width="500" height="300"></canvas>
     </body>
 </html>
