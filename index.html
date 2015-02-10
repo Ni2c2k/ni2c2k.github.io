@@ -42,7 +42,7 @@
                 board.graphics.endStroke();
                 stage.addChild( board );
                 
-                
+                //stage.update();
                 createjs.Ticker.on("tick", tick);
                 createjs.Ticker.setFPS(30);
             }
@@ -59,19 +59,19 @@
             
             function tick(event) {
                 
-                circle.x = circle.x + (event.delta) / 1000 * 100;
-                if( circle.x > stage.canvas.width ) {
-                    circle.x = 0;
-                }
+                //circle.x = circle.x + (event.delta) / 1000 * 100;
+                //if( circle.x > stage.canvas.width ) {
+                //    circle.x = 0;
+                //}
                 
-                circle1.x = circle1.x + (event.delta) / 1000 * 200;
-                if( circle1.x > stage.canvas.width ) {
-                    circle1.x = 0;
-                }
-                circle1.y = circle1.y - (event.delta) / 1000 * 50;
-                if( circle1.y < 0 ) {
-                    circle1.y = stage.canvas.height;
-                }
+                //circle1.x = circle1.x + (event.delta) / 1000 * 200;
+                //if( circle1.x > stage.canvas.width ) {
+                //    circle1.x = 0;
+                //}
+                //circle1.y = circle1.y - (event.delta) / 1000 * 50;
+                //if( circle1.y < 0 ) {
+                //    circle1.y = stage.canvas.height;
+                //}
                 stage.update(event);
             }
             
