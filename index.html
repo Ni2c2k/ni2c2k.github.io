@@ -7,9 +7,14 @@
         <script type="text/javascript">
             
             var stage, circle, circle1;
+            var board;
+            
             
             function init(){
                 stage = new createjs.Stage("gameCanvas");
+                
+                createjs.Touch.enable( stage );
+                
                 circle = new createjs.Shape();
                 circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
                 circle.x = 100;
@@ -23,7 +28,20 @@
                 stage.addChild(circle1);
                 
                 circle.on('pressmove', handlePressMove);
+                circle.on('touchmove', handlePressMove);
                 circle.on('pressup', handlePressUp);
+                
+                // create board
+                board = new createjs.Shape();
+                board.graphics.beginStroke("black");
+                var dx = 30;
+                for( var i = 0; i < 11; ++i ) {
+                    board.graphics.moveTo(0, i * dx).lineTo(dx * 10, i * dx );
+                    board.graphics.moveTo(dx * i, 0).lineTo(dx * i, dx * 10 );
+                }
+                board.graphics.endStroke();
+                stage.addChild( board );
+                
                 
                 createjs.Ticker.on("tick", tick);
                 createjs.Ticker.setFPS(30);
@@ -61,6 +79,6 @@
     </head>
     <body onload="init();">
         <p>Just a simple test page</p>
-        <canvas id="gameCanvas" width="500" height="300"></canvas>
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
     </body>
 </html>
