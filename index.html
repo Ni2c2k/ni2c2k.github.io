@@ -264,10 +264,12 @@
 			
 			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
 			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
+            this.shape.on( 'touchmove', controller.pressmove, controller, false, {square: this } );
 
 			this.disableEvents = function() {
 				this.shape.off( 'pressmove', controller.pressmove );
 				this.shape.off( 'pressup', controller.pressup );
+                this.shape.off( 'touchmove', controller.pressmove );
 			}
 			
 			this.getScore = function() {
