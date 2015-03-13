@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>Test github.io</title>
         <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
-	<script src="game.js"></script>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
         <script type="text/javascript">
 		var game = {};
 		
@@ -30,6 +30,18 @@
 					}
 				}
 				//console.log( cells );
+			};
+			
+			g.isOneMoreFigureCanBePlaced = function( figure ) {
+				var squarePosition = figure.getFirstSquarePosition();
+				for( var x = 0; x < sizey; ++x ) {
+					for( var y = 0; y < sizey; ++y ) {
+						if( g.isCanAddFigure( figure, squarePosition.x, squarePosition.y, x, y ) == true ) {
+							return true;
+						}
+					}
+				}
+				return false;
 			};
 			
 			g.isCanAddFigure = function( figure, figurex, figurey, xpos, ypos ) {
@@ -68,6 +80,7 @@
 				if( falseBottom == 0 && falseTop == 0 && falseRight == 0 && falseLeft == 0 && isCollision == 0) {
 					return true;
 				} else {
+					//console.log( "false: bottom, top, right, left, collision " + falseBottom + " " + falseTop + " " + falseRight + " " + falseLeft + " " + isCollision );
 					return false;
 				}
 			};
@@ -75,7 +88,7 @@
 			g.addFigure = function( figure, figurex, figurey, xpos, ypos ) {
 				var squareCounts = 0;
 				var result = false;
-				if( g.isCanAddFigure( figure, figurex, figurey, xpos, ypos ) == true ) {
+				//if( g.isCanAddFigure( figure, figurex, figurey, xpos, ypos ) == true ) {
 					for( var y = 0; y < 3; ++y ) {
 						for( var x = 0; x < 3; ++x ) {
 							if( figure.squares[y * 3 + x] != null ) {
@@ -89,7 +102,7 @@
 						}
 					}
 					result = true;
-				}
+				//}
 				return { 'result': result, 'addedCount': squareCounts };
 			};
 			
@@ -137,6 +150,7 @@
 						for( var y = 0; y < sizey; ++y ) {
 							if( cells[y][x] != null ) {
 								deletedSquares[ deletedSquares.length ] = cells[y][x];
+								cells[y][x] = null;
 							}
 						}
 					}
@@ -160,7 +174,7 @@
 		( function( c, newCount ) {
 			var placeForNewFigures = {
 				'x': 15,
-				'y': 400
+				'y': 330
 			};
 			var newFigures = [];
 			
@@ -187,8 +201,31 @@
 						if( game.isCanAddFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y ) == true ) {
 							game.addFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y );
 							
+							var deletedSquares = game.deleteFullLinesAndColumns( game.checkLines() );
+							//console.log( deletedSquares.length );
+							
+							if( deletedSquares.length > 0 ) {
+								for( var i = 0; i < deletedSquares.length; ++i ) {
+									scoreHandler.add( deletedSquares[i].getScore() );
+									stage.removeChild( deletedSquares[i].shape );
+								}
+							}
+							
+							console.log( scoreHandler.getScore() );
+							
 							newFigures.splice( newFigures.indexOf( figure ), 1 );
 							c.checkAndUpdateNewFigures();
+							
+							var isEnd = true;
+							for( var i = 0; i < newFigures.length; ++i ) {
+								if( game.isOneMoreFigureCanBePlaced( newFigures[ i ] ) == true ) {
+									isEnd = false;
+									break;
+								}
+							}
+							if( isEnd == true ) {
+								$("#scoreLabel").text("The End. Your score: " + scoreHandler.getScore() );
+							}
 							
 						} else {
 							figure.backToInitialPosition();
@@ -210,10 +247,6 @@
 				}
 			};
 			
-			c.deleteSquares = function() {
-				// TODO:
-			};
-			
 		})( controller, 3 );
 		
 		var Square = function( color, figure ) {
@@ -221,10 +254,12 @@
 			this.x = 0;
 			this.y = 0;
 			this.shape = new createjs.Shape();
-			this.shape.graphics.beginFill(this.color).drawCircle(0,0,15);
+			//this.shape.graphics.beginFill(this.color).drawCircle(0,0,15);
+			this.shape.graphics.beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
 			this.shape.x = this.x;
 			this.shape.y = this.y;
 			this.figure = figure;
+			this.score = 1;
 			stage.addChild( this.shape );
 			
 			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
@@ -233,6 +268,10 @@
 			this.disableEvents = function() {
 				this.shape.off( 'pressmove', controller.pressmove );
 				this.shape.off( 'pressup', controller.pressup );
+			}
+			
+			this.getScore = function() {
+				return this.score;
 			}
 		};
 		
@@ -293,18 +332,43 @@
 				}
 				return { 'x' : xp, 'y' : yp };
 			}
+			
+			this.getFirstSquarePosition = function() {
+				for( var y = 0; y < 3; ++y ) {
+					for( var x = 0; x < 3; ++x ) {
+						if( this.squares[y * 3 + x] != null ) {
+							return { 'x' : x, 'y' : y };
+						}
+					}
+				}
+				return { 'x':0, 'y':0 };
+			}
 		};
 		
 		var board;
 		var circle;
 		var fig1, fig2;
 		
+		var scoreHandler = {};
+		( function( s ) {
+			var score = 0;
+			s.reset = function() {
+				score = 0;
+			};
+			s.add = function( count ) {
+				score = score + count;
+				$("#scoreLabel").text("Score: " + score );
+			};
+			s.getScore = function( ) {
+				return score;
+			};
+		})( scoreHandler );
 		
 		var FigureFactory = {};
 		
 		( function( f ) {
 		
-			var colors = ['red', 'blue', 'green', 'yellow', 'black', 'brown' ];
+			var colors = ['red', 'blue', 'green', 'gray', 'brown' ];
 			var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
 							[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
 							[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
@@ -329,16 +393,8 @@
 				stage.addChild(board);
 				
 				game.init();
-				
-				fig1 = new Figure( "red", [0,1,0,1,1,1,0,1,0]);
-				
-				fig2 = new Figure( "blue", [0,0,1,0,0,1,0,1,1]);
-				
-				fig3 = new Figure( 'green', [1,1,1,1,1,1,1,1,1]);
-				
-				controller.addNewFigure( fig1 );
-				controller.addNewFigure( fig2 );
-				controller.addNewFigure( fig3 );
+				scoreHandler.reset();
+				controller.checkAndUpdateNewFigures();
 				
 				createjs.Ticker.on( "tick", tick );
 				createjs.Ticker.setFPS( 30 );
@@ -352,6 +408,7 @@
     </head>
     <body onload="init();">
         <p>Just a simple test page</p>
-        <canvas id="gameCanvas" width="500" height="500"></canvas>
+        <canvas id="gameCanvas" width="500" height="420"></canvas>
+        <p id="scoreLabel">Score: 0</p>
     </body>
 </html>
