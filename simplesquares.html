@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Simple Squares Game</title>
+        <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script type="text/javascript">
+		
+		var stage;
+		
+		function getRandomInt( min, max ) {
+			return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+		};
+		
+		var GameState = {};
+		( function( gs ){
+			gs.startGame = function() {
+				game.init();
+				scoreHandler.reset();
+				controller.checkAndUpdateNewFigures();
+			};
+			gs.endGame = function() {
+			};
+		})( GameState );
+		
+		var game = {};
+		( function( g, sizex, sizey ) {
+			
+			var sizex = sizex;
+			var sizey = sizey;
+
+			var cells = {};
+			
+			g.init = function() {
+				for( var y = 0; y < sizey; ++y ) {
+					cells[y] = new Array(sizex);
+					for( var x = 0; x < sizex; ++x ) {
+						cells[y][x] = null;
+					}
+				}
+				//console.log( cells );
+			};
+			
+			g.isOneMoreFigureCanBePlaced = function( figure ) {
+				var squarePosition = figure.getFirstSquarePosition();
+				for( var x = 0; x < sizey; ++x ) {
+					for( var y = 0; y < sizey; ++y ) {
+						if( g.isCanAddFigure( figure, squarePosition.x, squarePosition.y, x, y ) == true ) {
+							return true;
+						}
+					}
+				}
+				return false;
+			};
+			
+			g.isCanAddFigure = function( figure, figurex, figurey, xpos, ypos ) {
+				// check right
+				var falseRight = 0;
+				var falseLeft = 0;
+				var falseBottom = 0;
+				var falseTop = 0;
+				var isCollision = 0;
+				for( var y = 0; y < 3; ++y){
+					for( var x = 0; x < 3; ++x ) {
+						if( figure.squares[y * 3 + x] != null ) {
+							if( xpos + x - figurex >= sizex ) {
+								falseRight = 1;
+								break;
+							}
+							if( xpos + x - figurex < 0 ) {
+								falseLeft = 1;
+								break;
+							}
+							if( ypos + y - figurey >= sizey ) {
+								falseBottom = 1;
+								break;
+							}
+							if( ypos + y - figurey < 0 ) {
+								falseTop = 1;
+								break;
+							}
+							if( cells[ypos + y - figurey][xpos + x - figurex] != null ) {
+								isCollision = 1;
+								break;
+							}
+						}
+					}
+				}
+				if( falseBottom == 0 && falseTop == 0 && falseRight == 0 && falseLeft == 0 && isCollision == 0) {
+					return true;
+				} else {
+					//console.log( "false: bottom, top, right, left, collision " + falseBottom + " " + falseTop + " " + falseRight + " " + falseLeft + " " + isCollision );
+					return false;
+				}
+			};
+			
+			g.addFigure = function( figure, figurex, figurey, xpos, ypos ) {
+				var squareCounts = 0;
+				var result = false;
+				//if( g.isCanAddFigure( figure, figurex, figurey, xpos, ypos ) == true ) {
+					for( var y = 0; y < 3; ++y ) {
+						for( var x = 0; x < 3; ++x ) {
+							if( figure.squares[y * 3 + x] != null ) {
+								cells[ypos + y - figurey][xpos + x - figurex] = figure.squares[y*3+x];
+								cells[ypos + y - figurey][xpos + x - figurex].shape.x = (xpos + x - figurex) * 30 + 15 + 15;
+								cells[ypos + y - figurey][xpos + x - figurex].shape.y = (ypos + y - figurey) * 30 + 15;
+								cells[ypos + y - figurey][xpos + x - figurex].disableEvents();
+								cells[ypos + y - figurey][xpos + x - figurex].figure = null;
+								squareCounts += 1;
+							}
+						}
+					}
+					result = true;
+				//}
+				return { 'result': result, 'addedCount': squareCounts };
+			};
+			
+			g.checkLines = function( ) {
+				var lines = {};
+				var columns = {};
+				for( var y = 0; y < sizey; ++y ) {
+					var full = 1;
+					for( var x = 0; x < sizex; ++x ) {
+						if( cells[y][x] == null ) {
+							full = 0;
+							break;
+						}
+					}
+					lines[y] = full;
+				}
+				
+				for( var x = 0; x < sizex; ++x ) {
+					var full = 1;
+					for( var y = 0; y < sizey; ++y ) {
+						if( cells[y][x] == null ) {
+							full = 0;
+							break;
+						}
+					}
+					columns[x] = full;
+				}
+				return { 'lines' : lines, 'columns' : columns };
+ 			};
+ 			
+ 			g.deleteFullLinesAndColumns = function( lc ) {
+				var deletedSquares = [];
+				for( var y = 0; y < sizey; ++y ) {
+					if( lc['lines'][y] != 0 ) {
+						for( var x = 0; x < sizex; ++x ) {
+							if( cells[y][x] != null ) {
+								deletedSquares[ deletedSquares.length ] = cells[y][x];
+								cells[y][x] = null;
+							}
+						}
+					}
+				}
+				for( var x = 0; x < sizex; ++x ) {
+					if( lc['columns'][x] != 0 ) {
+						for( var y = 0; y < sizey; ++y ) {
+							if( cells[y][x] != null ) {
+								deletedSquares[ deletedSquares.length ] = cells[y][x];
+								cells[y][x] = null;
+							}
+						}
+					}
+				}
+				return deletedSquares;
+ 			};
+ 			
+ 			g.getCellByCrd = function ( x, y ) {
+				if( x < 15 ) {
+					return { 'x': -1, 'y': -1 };
+				}
+				var xp = Math.floor((x - 15) / 30);
+				var yp = Math.floor(y / 30);
+				return { 'x': xp, 'y': yp };
+ 			};
+			
+		})( game, 10, 10);
+		
+		var deletedSquaresManager = {};
+		( function( d ) {
+			var squares = [];
+			
+			d.addSquare = function( sq ) {
+				squares[squares.length] = sq;
+			}
+			
+			d.update = function( event ) {
+				for( var i = squares.length-1; i >= 0; --i ) {
+					if( squares[i] != null ) {
+						squares[i].animate();
+						if( squares[i].isAnimateEnded() == true ) {
+							Pool.releaseElement( squares[ i ] );
+							squares.splice( i, 1 );
+						}
+					}
+				}
+			}
+			
+		})( deletedSquaresManager );
+		
+		var controller = {};
+		
+		( function( c, newCount ) {
+			var placeForNewFigures = {
+				'x': 15,
+				'y': 330
+			};
+			var newFigures = [];
+			
+			c.animateFigures = function( event ) {
+				for( var i = 0; i < newFigures.length; ++i ) {
+					newFigures[i].animate( event );
+				}
+			};
+			
+			c.addNewFigure = function( figure ) {
+				figure.setPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
+				figure.setInitialPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
+				newFigures[ newFigures.length ] = figure;
+			};
+			
+			c.pressmove = function( evt, data ) {
+				if( data.square.figure != null ) {
+					data.square.figure.stopMoveAnimation();
+					data.square.figure.addDeltaToPosition( evt.stageX - data.square.shape.x, evt.stageY - data.square.shape.y );
+				}
+			};
+			
+			c.pressup = function( evt, data ) {
+				if( data.square.figure != null ) {
+					var figure = data.square.figure;
+					
+					var squarePosition = figure.getTouchedSquarePosition( evt );
+					
+					var cellTouched = game.getCellByCrd( evt.stageX, evt.stageY );
+					if( cellTouched.x > -1 && cellTouched.y > -1 ) {
+						if( game.isCanAddFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y ) == true ) {
+							var result = game.addFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y );
+							
+							scoreHandler.addSquaresCount( result.addedCount );
+							
+							var deletedSquares = game.deleteFullLinesAndColumns( game.checkLines() );
+							
+							if( deletedSquares.length > 0 ) {
+								for( var i = 0; i < deletedSquares.length; ++i ) {
+									scoreHandler.add( deletedSquares[i].getScore() );
+									deletedSquaresManager.addSquare( deletedSquares[i] );
+								}
+							}
+							
+							newFigures.splice( newFigures.indexOf( figure ), 1 );
+							c.checkAndUpdateNewFigures();
+							
+							var isEnd = true;
+							for( var i = 0; i < newFigures.length; ++i ) {
+								if( game.isOneMoreFigureCanBePlaced( newFigures[ i ] ) == true ) {
+									isEnd = false;
+									break;
+								}
+							}
+							if( isEnd == true ) {
+								$("#scoreLabel").text("The End. Your score: " + scoreHandler.getScore() );
+							}
+							
+						} else {
+							figure.backToInitialPosition();
+						}
+					} else {
+						figure.backToInitialPosition();
+					}
+				}
+			};
+			
+			c.checkAndUpdateNewFigures = function() {
+				if( newFigures.length != 0 ) {
+					return;
+				}
+				
+				// add New figures
+				for( var i = 0; i < 3; ++i ) {
+					c.addNewFigure( FigureFactory.create() );
+				}
+			};
+			
+		})( controller, 3 );
+		
+		var Square = function( color, figure ) {
+			/*
+			this.color = color;
+			this.shape = new createjs.Shape();
+			this.shape.graphics.beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
+			this.figure = figure;
+			this.animateCounter = 0;
+			this.score = 1;
+			stage.addChild( this.shape );
+			
+			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
+			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
+			*/
+			this.color = 'red';
+			this.shape = new createjs.Shape();
+			this.figure = null;
+			this.animateCounter = 0;
+			this.score = 1;
+			this.inUse = false;
+		};
+		
+		Square.prototype.init = function( color, figure ) {
+			this.color = color;
+			this.shape.graphics.clear().beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
+			this.figure = figure;
+			this.animateCounter = 0;
+			this.score = 1;
+			stage.addChild( this.shape );
+			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
+			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
+            this.shape.on( 'touchmove', controller.pressmove, controller, false, {square: this } );
+		};
+		
+		Square.prototype.isInUse = function() {
+			return this.inUse;
+		};
+		
+		Square.prototype.animate = function() {
+			this.animateCounter = this.animateCounter + 1;
+			this.shape.graphics.clear().beginFill(this.color).drawRect(-15 + 15 / 20 * this.animateCounter, -15 + 15 / 20 * this.animateCounter, 30 - 30 / 20 * this.animateCounter, 30 - 30 / 20 * this.animateCounter);
+		};
+		
+		Square.prototype.isAnimateEnded = function() {
+			if( this.animateCounter > 20 ) {
+				return true;
+			}
+			return false;
+		};
+		
+		Square.prototype.release = function() {
+			stage.removeChild( this.shape );
+			this.inUse = false;
+		};
+		
+		Square.prototype.getScore = function() {
+			return this.score;
+		};
+		
+		Square.prototype.disableEvents = function() {
+			this.shape.off( 'pressmove', controller.pressmove );
+			this.shape.off( 'pressup', controller.pressup );
+            this.shape.off( 'touchmove', controller.pressmove );
+		};
+		
+		var Figure = function( color, pointArray, stage) {
+			this.squares = new Array(9);
+			this.x = 0;
+			this.y = 0;
+			this.initialX = 0;
+			this.initialY = 0;
+			this.isMovingToInitialPosition = false;
+			
+			this.dx = 0;
+			this.dy = 0;
+			
+			for( var i = 0; i < pointArray.length; ++i ) {
+				if( pointArray[i] ) {
+					//this.squares[i] = new Square( color, this);
+					this.squares[i] = Pool.getElement();
+					this.squares[i].init( color, this );
+				} else {
+					this.squares[i] = null;
+				}
+			}
+			
+			this.stopMoveAnimation = function() {
+				this.isMovingToInitialPosition = false;
+			}
+		};
+		
+		Figure.prototype.setPosition = function( x, y ) {
+			this.x = x;
+			this.y = y;
+			for( var yi = 0; yi < 3; ++yi ) {
+				for( var xi = 0; xi < 3; ++xi ) {
+					if( this.squares[yi * 3 + xi] != null) { 
+						this.squares[yi * 3 + xi].shape.x = this.x + 30 * xi;
+						this.squares[yi * 3 + xi].shape.y = this.y + 30 * yi;
+					}
+				}
+			}
+		};
+		
+		Figure.prototype.addDeltaToPosition = function( dx, dy ) {
+			this.setPosition( this.x + dx, this.y + dy );
+		};
+		
+		Figure.prototype.setInitialPosition = function( x, y ) {
+			this.initialX = x;
+			this.initialY = y;
+		};
+		
+		Figure.prototype.backToInitialPosition = function() {
+			this.dx = (this.initialX - this.x) / 5;
+			this.dy = (this.initialY - this.y) / 5;
+			this.isMovingToInitialPosition = true;
+		};
+		
+		Figure.prototype.getTouchedSquarePosition = function( evt ) {
+			var xp = 0, yp = 0;
+			for( var y = 0; y < 3; ++y ) {
+				for( var x = 0; x < 3; ++x ) {
+					if( this.squares[y * 3 + x] != null ) {
+						var sq = this.squares[ y * 3 + x ];
+						if( sq.shape.x <= evt.stageX && sq.shape.x + 30 > evt.stageX ) {
+							xp = x;
+						}
+						if( sq.shape.y <= evt.stageY && sq.shape.y + 30 > evt.stageY ) {
+							yp = y;
+						}
+					}
+				}
+			}
+			return { 'x' : xp, 'y' : yp };
+		};
+		
+		Figure.prototype.animate = function( event ) {
+			if( this.isMovingToInitialPosition == true ) {
+				this.setPosition( this.x + this.dx, this.y + this.dy );
+				
+				if( Math.abs( this.x - this.initialX ) < 2 ) {
+					this.setPosition( this.initialX, this.initialY );
+					this.isMovingToInitialPosition = false;
+				}
+			}
+		};
+		
+		Figure.prototype.getFirstSquarePosition = function() {
+			for( var y = 0; y < 3; ++y ) {
+				for( var x = 0; x < 3; ++x ) {
+					if( this.squares[y * 3 + x] != null ) {
+						return { 'x' : x, 'y' : y };
+					}
+				}
+			}
+			return { 'x':0, 'y':0 };
+		};
+		
+		var board;
+		var circle;
+		
+		var scoreHandler = {};
+		( function( s ) {
+			var score = 0;
+			var addedSquaresCount = 0;
+			s.reset = function() {
+				score = 0;
+				addedSquaresCount = 0;
+			};
+			s.add = function( count ) {
+				score = score + count;
+				$("#scoreLabel").text("Score: " + score );
+			};
+			s.getScore = function( ) {
+				return score;
+			};
+			s.addSquaresCount = function( count ) {
+				addedSquaresCount = addedSquaresCount + count;
+				$("#addedSquaresCount").text("Score1: " + addedSquaresCount );
+			};
+			s.getSquaresCount = function() {
+				return addedSquaresCount;
+			};
+		})( scoreHandler );
+		
+		var FigureFactory = {};
+		
+		( function( f ) {
+		
+			var colors = ['red', 'blue', 'green', 'gray', 'brown' ];
+			var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
+							[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
+							[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
+							[0,0,1,0,0,1,0,1,1], [1,0,0,1,0,0,1,1,0]];
+		
+			f.create = function() {
+				var fig = new Figure( colors[ getRandomInt( 0, colors.length - 1 )], forms[ getRandomInt( 0, forms.length - 1 ) ] );
+				return fig;
+			};
+		})( FigureFactory );
+		
+		var Pool = {};
+		( function(p) {
+			var pool = [];
+			var poolSize = 0;
+			
+			p.expandPool = function(count) {
+				//console.log( "expand pool: " + count );
+				for( var i = 0; i < count - poolSize; ++i ) {
+					pool.push( new Square() );
+				}
+				poolSize = count;
+				//console.log( "after expanding poolSize = " + poolSize );
+			};
+			
+			p.getElement = function() {
+				//console.log( "getElement: poolSize = " + poolSize + " pool.length = " + pool.length );
+				if( poolSize == 0 ) {
+					p.expandPool( 2 );
+				}
+				if( pool[ poolSize - 1 ].isInUse() == true ) {
+					p.expandPool( poolSize * 2 );
+				}
+				pool.unshift( pool.pop() );
+				pool[ 0 ].inUse = true;
+				return pool[ 0 ];
+			};
+			
+			p.releaseElement = function( square ) {
+				square.release();
+				var index = pool.indexOf( square );
+				//console.log( "release element " + index );
+				pool.push((pool.splice( index, 1))[0]);
+			};
+			
+		})( Pool );
+		
+            function init(){
+				stage = new createjs.Stage("gameCanvas");
+                createjs.Touch.enable(stage);
+				board = new createjs.Shape();
+				board.graphics.beginStroke("black");
+				var dx = 30;
+				for( var i = 0; i < 11; ++i ) {
+					board.graphics.moveTo(0 + 15, i * dx).lineTo(dx * 10 + 15, i * dx);
+					board.graphics.moveTo(dx * i + 15, 0).lineTo(dx * i + 15, dx * 10);
+				}
+				board.graphics.endStroke();
+				stage.addChild(board);
+				
+				console.log( "start" );
+				
+				Pool.expandPool( 10 * 10 * 2 + 3 * 9 );
+				
+				GameState.startGame();
+				
+				createjs.Ticker.on( "tick", tick );
+				createjs.Ticker.setFPS( 30 );
+			}
+			
+			function tick( event ) {
+				controller.animateFigures( event );
+				deletedSquaresManager.update( event );
+				stage.update();
+			}
+			
+        </script>
+    </head>
+    <body onload="init();">
+        <p>Just a simple test page</p>
+        <canvas id="gameCanvas" width="500" height="420"></canvas>
+        <p id="scoreLabel">Score: 0</p>
+        <p id="addedSquaresCount">Score1: 0</p>
+    </body>
+</html>
