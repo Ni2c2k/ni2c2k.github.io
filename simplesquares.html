@@ -3,11 +3,13 @@
     <head>
         <meta charset="utf-8"/>
         <title>Simple Squares Game</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
         <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
-        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>>
         <script type="text/javascript">
 		
 		var stage;
+		var isNeedRedraw = true;
 		
 		function getRandomInt( min, max ) {
 			return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
@@ -18,9 +20,13 @@
 			gs.startGame = function() {
 				game.init();
 				scoreHandler.reset();
+				controller.clearNewFigures();
 				controller.checkAndUpdateNewFigures();
+				isNeedRedraw = true;
+				$("#startButton").text("Играть заново");
 			};
 			gs.endGame = function() {
+				showResultScreen();
 			};
 		})( GameState );
 		
@@ -33,13 +39,23 @@
 			var cells = {};
 			
 			g.init = function() {
-				for( var y = 0; y < sizey; ++y ) {
-					cells[y] = new Array(sizex);
-					for( var x = 0; x < sizex; ++x ) {
-						cells[y][x] = null;
+				if( cells[0] == undefined ) {
+					for( var y = 0; y < sizey; ++y ) {
+						cells[y] = new Array(sizex);
+						for( var x = 0; x < sizex; ++x ) {
+							cells[y][x] = null;
+						}
+					}
+				} else {
+					for( var y = 0; y < sizey; ++y ) {
+						for( var x = 0; x < sizex; ++x ) {
+							if( cells[y][x] != null ) {
+								Pool.releaseElement( cells[y][x] );
+								cells[y][x] = null;
+							}
+						}
 					}
 				}
-				//console.log( cells );
 			};
 			
 			g.isOneMoreFigureCanBePlaced = function( figure ) {
@@ -90,7 +106,6 @@
 				if( falseBottom == 0 && falseTop == 0 && falseRight == 0 && falseLeft == 0 && isCollision == 0) {
 					return true;
 				} else {
-					//console.log( "false: bottom, top, right, left, collision " + falseBottom + " " + falseTop + " " + falseRight + " " + falseLeft + " " + isCollision );
 					return false;
 				}
 			};
@@ -98,7 +113,6 @@
 			g.addFigure = function( figure, figurex, figurey, xpos, ypos ) {
 				var squareCounts = 0;
 				var result = false;
-				//if( g.isCanAddFigure( figure, figurex, figurey, xpos, ypos ) == true ) {
 					for( var y = 0; y < 3; ++y ) {
 						for( var x = 0; x < 3; ++x ) {
 							if( figure.squares[y * 3 + x] != null ) {
@@ -112,7 +126,6 @@
 						}
 					}
 					result = true;
-				//}
 				return { 'result': result, 'addedCount': squareCounts };
 			};
 			
@@ -188,6 +201,9 @@
 			}
 			
 			d.update = function( event ) {
+				if( squares.length > 0 ) {
+					isNeedRedraw = true;
+				}
 				for( var i = squares.length-1; i >= 0; --i ) {
 					if( squares[i] != null ) {
 						squares[i].animate();
@@ -212,7 +228,9 @@
 			
 			c.animateFigures = function( event ) {
 				for( var i = 0; i < newFigures.length; ++i ) {
-					newFigures[i].animate( event );
+					if( newFigures[i].animate( event ) == true ) {
+						isNeedRedraw = true;
+					}
 				}
 			};
 			
@@ -220,12 +238,14 @@
 				figure.setPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
 				figure.setInitialPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
 				newFigures[ newFigures.length ] = figure;
+				isNeedRedraw = true;
 			};
 			
 			c.pressmove = function( evt, data ) {
 				if( data.square.figure != null ) {
 					data.square.figure.stopMoveAnimation();
 					data.square.figure.addDeltaToPosition( evt.stageX - data.square.shape.x, evt.stageY - data.square.shape.y );
+					isNeedRedraw = true;
 				}
 			};
 			
@@ -262,8 +282,10 @@
 								}
 							}
 							if( isEnd == true ) {
-								$("#scoreLabel").text("The End. Your score: " + scoreHandler.getScore() );
+								GameState.endGame();
 							}
+							
+							isNeedRedraw = true;
 							
 						} else {
 							figure.backToInitialPosition();
@@ -285,21 +307,25 @@
 				}
 			};
 			
+			c.clearNewFigures = function() {
+				for( var i = 0; i < newFigures.length; ++ i ) {
+					for( var y = 0; y < 3; ++y ) {
+						for( var x = 0; x < 3; ++x ) {
+							if( newFigures[i].squares[y * 3 + x] != null ) {
+								var square = newFigures[i].squares[ y * 3 + x ];
+								square.disableEvents();
+								square.figure = null;
+								Pool.releaseElement( square );
+							}
+						}
+					}
+				}
+				newFigures.splice( 0, newFigures.length );
+			};
+			
 		})( controller, 3 );
 		
 		var Square = function( color, figure ) {
-			/*
-			this.color = color;
-			this.shape = new createjs.Shape();
-			this.shape.graphics.beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
-			this.figure = figure;
-			this.animateCounter = 0;
-			this.score = 1;
-			stage.addChild( this.shape );
-			
-			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
-			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
-			*/
 			this.color = 'red';
 			this.shape = new createjs.Shape();
 			this.figure = null;
@@ -431,7 +457,9 @@
 					this.setPosition( this.initialX, this.initialY );
 					this.isMovingToInitialPosition = false;
 				}
+				return true;
 			}
+			return false;
 		};
 		
 		Figure.prototype.getFirstSquarePosition = function() {
@@ -453,34 +481,46 @@
 			var score = 0;
 			var addedSquaresCount = 0;
 			s.reset = function() {
-				score = 0;
-				addedSquaresCount = 0;
+				s.set( 0 );
+				s.setSquaresCount( 0 );
 			};
 			s.add = function( count ) {
-				score = score + count;
-				$("#scoreLabel").text("Score: " + score );
+				s.set( score + count );
+			};
+			s.set = function( count ) {
+				score = count;
+				$("#scoreLabel").text("Удалено: " + score );
 			};
 			s.getScore = function( ) {
 				return score;
 			};
 			s.addSquaresCount = function( count ) {
-				addedSquaresCount = addedSquaresCount + count;
-				$("#addedSquaresCount").text("Score1: " + addedSquaresCount );
+				s.setSquaresCount( addedSquaresCount + count );
 			};
 			s.getSquaresCount = function() {
 				return addedSquaresCount;
 			};
+			s.setSquaresCount = function( count ) {
+				addedSquaresCount = count;
+				$("#addedSquaresCount").text("Установлено: " + addedSquaresCount );
+			}
 		})( scoreHandler );
 		
 		var FigureFactory = {};
 		
 		( function( f ) {
 		
-			var colors = ['red', 'blue', 'green', 'gray', 'brown' ];
-			var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
-							[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
-							[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
-							[0,0,1,0,0,1,0,1,1], [1,0,0,1,0,0,1,1,0]];
+			var colors = ['lightcoral', 'chocolate', 'yellowgreen', 'limegreen', 'darkturquoise', 'dodgerblue', 'mediumvioletred' ];
+			//var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
+			//				[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
+			//				[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
+			//				[0,0,1,0,0,1,0,1,1], [1,0,0,1,0,0,1,1,0]];
+			var forms = [	[0,1,0,0,1,0,0,1,1], [0,1,0,0,1,0,1,1,0], [0,1,1,0,1,0,0,1,0], [1,1,0,0,1,0,0,1,0],
+							[1,0,0,1,1,1,0,0,0], [0,0,1,1,1,1,0,0,0], [0,0,0,1,1,1,1,0,0], [0,0,0,1,1,1,0,0,1],
+							[0,1,0,1,1,1,0,0,0], [0,0,0,1,1,1,0,1,0], [0,1,0,1,1,0,0,1,0], [0,1,0,0,1,1,0,1,0],
+							[0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0],
+							[0,0,0,0,1,0,0,0,0], [1,1,1,1,1,1,1,1,1]
+						];
 		
 			f.create = function() {
 				var fig = new Figure( colors[ getRandomInt( 0, colors.length - 1 )], forms[ getRandomInt( 0, forms.length - 1 ) ] );
@@ -494,16 +534,13 @@
 			var poolSize = 0;
 			
 			p.expandPool = function(count) {
-				//console.log( "expand pool: " + count );
 				for( var i = 0; i < count - poolSize; ++i ) {
 					pool.push( new Square() );
 				}
 				poolSize = count;
-				//console.log( "after expanding poolSize = " + poolSize );
 			};
 			
 			p.getElement = function() {
-				//console.log( "getElement: poolSize = " + poolSize + " pool.length = " + pool.length );
 				if( poolSize == 0 ) {
 					p.expandPool( 2 );
 				}
@@ -518,7 +555,6 @@
 			p.releaseElement = function( square ) {
 				square.release();
 				var index = pool.indexOf( square );
-				//console.log( "release element " + index );
 				pool.push((pool.splice( index, 1))[0]);
 			};
 			
@@ -541,8 +577,6 @@
 				
 				Pool.expandPool( 10 * 10 * 2 + 3 * 9 );
 				
-				GameState.startGame();
-				
 				createjs.Ticker.on( "tick", tick );
 				createjs.Ticker.setFPS( 30 );
 			}
@@ -550,15 +584,130 @@
 			function tick( event ) {
 				controller.animateFigures( event );
 				deletedSquaresManager.update( event );
-				stage.update();
+				if( isNeedRedraw == true ) {
+					stage.update();
+					isNeedRedraw = false;
+				}
 			}
 			
+			function showResultScreen() {
+				$("#squaresCountLable").text("Установлено квадратов: " + scoreHandler.getSquaresCount());
+				$("#deletedSquaresCountLable").text("Удалено квадратов: " + scoreHandler.getScore());
+				$("#main").slideUp(400, function(){
+					$("#endGameScreen").slideDown();
+				});
+			}
+			
+			function showGameScreen() {
+				$("#endGameScreen").slideUp(400, function(){
+					$("#main").slideDown(400, function() {
+						GameState.startGame();
+					});
+				});
+			}
+			
+			function showGameScreenFromWelcome() {
+				$("#welcomeScreen").slideUp(400, function(){
+					$("#main").slideDown(400, function() {
+						GameState.startGame();
+					});
+				});
+			}
+			
+			function showHelpScreen() {
+				$("#welcomeScreen").slideUp( 400, function() {
+					$("#infoScreen").slideDown(400, function() {
+					});
+				});
+			}
+			
+			function showWelcomeScreen() {
+				$("#infoScreen").slideUp( 400, function() {
+					$("#welcomeScreen").slideDown(400, function() {
+					});
+				});
+			}
+			
+			$(document).ready(function(){
+				init();
+				
+				$("#startButton").click( function() {
+					GameState.startGame();
+					//showResultScreen();
+				});
+				
+				$("#restartButton").click( showGameScreen );
+				$("#welcomeStartButton").click( showGameScreenFromWelcome );
+				$("#showHelpButton").click( showHelpScreen );
+				$("#infoScreenBackButton").click( showWelcomeScreen );
+				
+				//$("welcomeScreen").hide();
+				$("#endGameScreen").hide();
+				$("#main").hide();
+				$("#infoScreen").hide();
+			});
         </script>
     </head>
-    <body onload="init();">
-        <p>Just a simple test page</p>
-        <canvas id="gameCanvas" width="500" height="420"></canvas>
-        <p id="scoreLabel">Score: 0</p>
-        <p id="addedSquaresCount">Score1: 0</p>
+    <body>
+		<div id="main" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div id="content">
+				<div id="box1">
+					<canvas id="gameCanvas" width="330" height="420"></canvas>
+				</div>
+				<div id="box2">
+					тут будет список друзей
+				</div>
+			</div>
+			<div id="footer">
+				<button id="startButton">Начать игру</button>
+				<div id="scoreLabel">Score: 0</div>
+				<div id="addedSquaresCount">Score1: 0</div>
+			</div>
+		</div>
+		
+		<div id="endGameScreen" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div class="contentVertical">
+				<div id="scoreResult" class="curved">
+					<p class="font1">Игра закончена, Ваши результаты:</p>
+					<p id="squaresCountLable" class="font2">Your result: 100</p>
+					<p id="deletedSquaresCountLable" class="font2"></p>
+				</div>
+				<div id="buttons" class="curved">
+					<button id="restartButton">Попробовать ещё раз</button>
+					<button id="share">Поделиться результатом</button>
+				</div>
+			</div>
+			<div id="footer"></div>
+		</div>
+		
+		<div id="welcomeScreen" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div class="contentVertical">
+				<div id="startBlock" class="curved">
+					<p align="center" class="font1">SimpleSquares</p>
+					<p align="center" class="font2">Простая игра о квадратах и квадратами</p>
+					<p align="center"><button id="welcomeStartButton">Играть</button></p>
+				</div>
+			</div>
+			<div id="footer">
+				<button id="showHelpButton">Об игре</button>
+				<button>Пригласить друзей</button>
+			</div>
+		</div>
+		
+		<div id="infoScreen" class="mainContainer">
+			<div id="header">SimpleSquares game: справка</div>
+			<div class="contentVertical">
+				<div id="helpBlock" class="curved">
+					<p align="center" class="font2">
+					Целью игры является расположение максимального числа фигур из квадратов на игровом поле. При заполнении строки или столбца - квадраты удаляются.
+					</p>
+					<p align="center"><button id="infoScreenBackButton">Ok</button></p>
+				</div>
+			</div>
+			<div id="footer"></div>
+		</div>
     </body>
 </html>

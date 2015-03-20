@@ -1,0 +1,130 @@
+body {
+	background: moccasin;
+	margin: 0;
+}
+
+.mainContainer {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	flex-direction: column;
+	padding: 0;
+	margin: 0;	
+}
+
+#scoreResult {
+}
+
+#header {
+	background:darkturquoise;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding: 5px;
+	box-shadow: 0px 5px 5px 0px rgba(50,50,50,0.75);
+/*	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+*/
+}
+
+#content {
+	width: 100%;
+	display: flex;
+	justify-content: space-around;
+	padding: 5px;
+	margin: 0;
+}
+
+.contentVertical {
+	width: 100%;
+	display: flex;
+	justify-content: space-around;
+	flex-direction: column;
+	padding: 0;
+	margin: 0;
+	align-items: center;
+}
+
+#footer {
+	background:darkturquoise;
+	width: 100%;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	box-shadow: 0px -5px 5px 0px rgba(50,50,50,0.75);
+/*	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+*/
+}
+
+#box1 {
+	display: -moz-box;
+	-moz-box-pack: center;
+	-moz-box-flex: 0;
+	-moz-box-ordinal-group: 1;
+	padding-top: 3px;
+}
+
+#box2 {
+	border: 1px black solid;
+	/*background: green;*/
+	display: -moz-box;
+	-moz-box-pack: center;
+	-moz-box-flex: 0;
+	-moz-box-ordinal-group: 1;
+}
+
+#scoreResult {
+	display: -moz-box;
+	-moz-box-pack: center;
+	-moz-box-flex: 0;
+}
+
+#buttons {
+	display: -moz-box;
+	-moz-box-pack: center;
+	-moz-box-flex: 0;
+}
+
+#startBlock {
+	display: -moz-box;
+	-moz-box-pack: center;
+	-moz-box-flex: 0;
+}
+
+.curved {
+	position: relative;
+	width: 70%;
+	padding: 1em;
+	margin: 2em 10px 4em;
+	background: #fff;
+	box-shadow:0 1px 4px rgba(0,0,0,0.3), 0 0 40px rgba(0,0,0,0.1) inset;
+}
+
+.curved:before,
+.curved:after {
+	content: "";
+	position:absolute;
+	z-index:-1;
+}
+
+.curved:before {
+	top: 0px;
+	bottom: 0px;
+	left: 10px;
+	right: 10px;
+	box-shadow:0 0 15px rgba(0,0,0,0.6);
+	border-radius: 100px / 10px;
+}
+
+.font1 {
+	font-size: 18px;
+	font-weight: bold;
+	font-family: sans-serif;
+}
+
+.font2 {
+	font-size: 12px;
+	font-family: sans-serif;
+}
