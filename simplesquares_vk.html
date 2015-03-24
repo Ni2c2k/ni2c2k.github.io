@@ -7,6 +7,7 @@
         <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
         <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
         <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+        <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.3.5.min.js"></script>
         <script type="text/javascript">
 		
 		var stage;
@@ -629,7 +630,13 @@
 				});
 			}
 			
+            var vk_user_id = null;
+            var parseUser = null;
+            
 			$(document).ready(function(){
+                
+                Parse.initialize("H12S6M74DgahufnWJlkucKtDY0PJKJjMKUu2LGHA", "NDCiafWAvNWtwlmhGxXFif8AcyARC0EYQlVLeaaE");
+                
                 VK.init( function() {
                     console.log( "vk init ok" );
                     
@@ -644,12 +651,41 @@
                     }
                     
                     console.log("viewer_id = " + flashVars['viewer_id']);
+                    vk_user_id = flashVars['viewer_id'];
                     
                     VK.api('users.get', {'user_ids': flashVars['viewer_id'], 'fields' :'country'}, function(data) {
                         if( data.response ) {
                             console.log(data.response);
                         } else {
                             console.log('error');
+                        }
+                    });
+                    
+                    var user = new Parse.User.logIn(vk_user_id, vk_user_id , {
+                        success: function( user ) {
+                            parseUser = user;
+                        },
+                        error: function( user, error ) {
+                            console.log('error: ' + error.code + ' ' + error.message );
+                            if( error.code == 101 ) {
+                                var newUser = new Parse.User;
+                                newUser.set('username', vk_user_id );
+                                newUser.set('password', vk_user_id);
+                                newUser.set('email', vk_user_id + 'name@vk.com');
+                                newUser.set('addedCount', 0 );
+                                newUser.set('deletedCount', 0 );
+                                newUser.set('gamePlayedCount', 0 );
+                                
+                                newUser.signUp( null, {
+                                    success: function( user ) {
+                                        console.log('new user signed up');
+                                        parseUser = user;
+                                    },
+                                    error: function( user, error ) {
+                                        console.log("error new user signed up");
+                                    }
+                                });
+                            }
                         }
                     });
                     
