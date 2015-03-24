@@ -731,6 +731,10 @@
 					GameState.startGame();
 					//showResultScreen();
 				});
+                
+                $("#inviteFriends").click( function() {
+                    VK.callMethod( 'showInviteBox' );
+                });
 				
 				$("#restartButton").click( showGameScreen );
 				$("#welcomeStartButton").click( showGameScreenFromWelcome );
@@ -788,7 +792,7 @@
 			</div>
 			<div id="footer">
 				<button id="showHelpButton">Об игре</button>
-				<button>Пригласить друзей</button>
+				<button id="inviteFriends">Пригласить друзей</button>
 			</div>
 		</div>
 		
