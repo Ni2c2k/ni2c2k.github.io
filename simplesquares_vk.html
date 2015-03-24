@@ -645,7 +645,7 @@
                     
                     console.log("viewer_id = " + flashVars['viewer_id']);
                     
-                    VK.api('users.get', {fields:'country'}, function(data) {
+                    VK.api('users.get', {user_ids: flashVars['viewer_id'],fields:'country'}, function(data) {
                         if( data.response ) {
                             console.log(data.response);
                         } else {
