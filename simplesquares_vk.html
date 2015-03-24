@@ -17,6 +17,34 @@
 			return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
 		};
 		
+        function updateParseData() {
+            if( scoreHandler.getSquaresCount() > parseUser.get("addedCount") ) {
+                parseUser.set("addedCount", scoreHandler.getSquaresCount());
+            }
+            if( scoreHandler.getScore() > parseUser.get("deletedCount") ) {
+                parseUser.set("deletedCount", scoreHandler.getScore());
+            }
+            var gameCount = parseUser.get("gamePlayedCount");
+            parseUser.set("gamePlayedCount", gameCount + 1);
+            
+            user.save( null, {
+                success: function(user) {
+                    console.log("new data saved");
+                },
+                error: function(user, errpr) {
+                    console.log("error saving new data");
+                }
+            });
+        }
+            
+            function showResultScreen() {
+				$("#squaresCountLable").text("Установлено квадратов: " + scoreHandler.getSquaresCount());
+				$("#deletedSquaresCountLable").text("Удалено квадратов: " + scoreHandler.getScore());
+				$("#main").slideUp(400, function(){
+					$("#endGameScreen").slideDown();
+				});
+			}
+            
 		var GameState = {};
 		( function( gs ){
 			gs.startGame = function() {
@@ -28,6 +56,7 @@
 				$("#startButton").text("Играть заново");
 			};
 			gs.endGame = function() {
+                updateParseData();
 				showResultScreen();
 			};
 		})( GameState );
@@ -633,6 +662,9 @@
             var vk_user_id = null;
             var parseUser = null;
             
+            function initAfterLogin() {
+            }
+            
 			$(document).ready(function(){
                 
                 Parse.initialize("H12S6M74DgahufnWJlkucKtDY0PJKJjMKUu2LGHA", "NDCiafWAvNWtwlmhGxXFif8AcyARC0EYQlVLeaaE");
@@ -704,8 +736,7 @@
 				$("#welcomeStartButton").click( showGameScreenFromWelcome );
 				$("#showHelpButton").click( showHelpScreen );
 				$("#infoScreenBackButton").click( showWelcomeScreen );
-				
-				//$("welcomeScreen").hide();
+
 				$("#endGameScreen").hide();
 				$("#main").hide();
 				$("#infoScreen").hide();
