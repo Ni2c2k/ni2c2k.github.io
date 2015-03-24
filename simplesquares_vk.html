@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Simple Squares Game</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+        <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+        <script type="text/javascript">
+		
+		var stage;
+		var isNeedRedraw = true;
+		
+		function getRandomInt( min, max ) {
+			return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+		};
+		
+		var GameState = {};
+		( function( gs ){
+			gs.startGame = function() {
+				game.init();
+				scoreHandler.reset();
+				controller.clearNewFigures();
+				controller.checkAndUpdateNewFigures();
+				isNeedRedraw = true;
+				$("#startButton").text("Играть заново");
+			};
+			gs.endGame = function() {
+				showResultScreen();
+			};
+		})( GameState );
+		
+		var game = {};
+		( function( g, sizex, sizey ) {
+			
+			var sizex = sizex;
+			var sizey = sizey;
+
+			var cells = {};
+			
+			g.init = function() {
+				if( cells[0] == undefined ) {
+					for( var y = 0; y < sizey; ++y ) {
+						cells[y] = new Array(sizex);
+						for( var x = 0; x < sizex; ++x ) {
+							cells[y][x] = null;
+						}
+					}
+				} else {
+					for( var y = 0; y < sizey; ++y ) {
+						for( var x = 0; x < sizex; ++x ) {
+							if( cells[y][x] != null ) {
+								Pool.releaseElement( cells[y][x] );
+								cells[y][x] = null;
+							}
+						}
+					}
+				}
+			};
+			
+			g.isOneMoreFigureCanBePlaced = function( figure ) {
+				var squarePosition = figure.getFirstSquarePosition();
+				for( var x = 0; x < sizey; ++x ) {
+					for( var y = 0; y < sizey; ++y ) {
+						if( g.isCanAddFigure( figure, squarePosition.x, squarePosition.y, x, y ) == true ) {
+							return true;
+						}
+					}
+				}
+				return false;
+			};
+			
+			g.isCanAddFigure = function( figure, figurex, figurey, xpos, ypos ) {
+				// check right
+				var falseRight = 0;
+				var falseLeft = 0;
+				var falseBottom = 0;
+				var falseTop = 0;
+				var isCollision = 0;
+				for( var y = 0; y < 3; ++y){
+					for( var x = 0; x < 3; ++x ) {
+						if( figure.squares[y * 3 + x] != null ) {
+							if( xpos + x - figurex >= sizex ) {
+								falseRight = 1;
+								break;
+							}
+							if( xpos + x - figurex < 0 ) {
+								falseLeft = 1;
+								break;
+							}
+							if( ypos + y - figurey >= sizey ) {
+								falseBottom = 1;
+								break;
+							}
+							if( ypos + y - figurey < 0 ) {
+								falseTop = 1;
+								break;
+							}
+							if( cells[ypos + y - figurey][xpos + x - figurex] != null ) {
+								isCollision = 1;
+								break;
+							}
+						}
+					}
+				}
+				if( falseBottom == 0 && falseTop == 0 && falseRight == 0 && falseLeft == 0 && isCollision == 0) {
+					return true;
+				} else {
+					return false;
+				}
+			};
+			
+			g.addFigure = function( figure, figurex, figurey, xpos, ypos ) {
+				var squareCounts = 0;
+				var result = false;
+					for( var y = 0; y < 3; ++y ) {
+						for( var x = 0; x < 3; ++x ) {
+							if( figure.squares[y * 3 + x] != null ) {
+								cells[ypos + y - figurey][xpos + x - figurex] = figure.squares[y*3+x];
+								cells[ypos + y - figurey][xpos + x - figurex].shape.x = (xpos + x - figurex) * 30 + 15 + 15;
+								cells[ypos + y - figurey][xpos + x - figurex].shape.y = (ypos + y - figurey) * 30 + 15;
+								cells[ypos + y - figurey][xpos + x - figurex].disableEvents();
+								cells[ypos + y - figurey][xpos + x - figurex].figure = null;
+								squareCounts += 1;
+							}
+						}
+					}
+					result = true;
+				return { 'result': result, 'addedCount': squareCounts };
+			};
+			
+			g.checkLines = function( ) {
+				var lines = {};
+				var columns = {};
+				for( var y = 0; y < sizey; ++y ) {
+					var full = 1;
+					for( var x = 0; x < sizex; ++x ) {
+						if( cells[y][x] == null ) {
+							full = 0;
+							break;
+						}
+					}
+					lines[y] = full;
+				}
+				
+				for( var x = 0; x < sizex; ++x ) {
+					var full = 1;
+					for( var y = 0; y < sizey; ++y ) {
+						if( cells[y][x] == null ) {
+							full = 0;
+							break;
+						}
+					}
+					columns[x] = full;
+				}
+				return { 'lines' : lines, 'columns' : columns };
+ 			};
+ 			
+ 			g.deleteFullLinesAndColumns = function( lc ) {
+				var deletedSquares = [];
+				for( var y = 0; y < sizey; ++y ) {
+					if( lc['lines'][y] != 0 ) {
+						for( var x = 0; x < sizex; ++x ) {
+							if( cells[y][x] != null ) {
+								deletedSquares[ deletedSquares.length ] = cells[y][x];
+								cells[y][x] = null;
+							}
+						}
+					}
+				}
+				for( var x = 0; x < sizex; ++x ) {
+					if( lc['columns'][x] != 0 ) {
+						for( var y = 0; y < sizey; ++y ) {
+							if( cells[y][x] != null ) {
+								deletedSquares[ deletedSquares.length ] = cells[y][x];
+								cells[y][x] = null;
+							}
+						}
+					}
+				}
+				return deletedSquares;
+ 			};
+ 			
+ 			g.getCellByCrd = function ( x, y ) {
+				if( x < 15 ) {
+					return { 'x': -1, 'y': -1 };
+				}
+				var xp = Math.floor((x - 15) / 30);
+				var yp = Math.floor(y / 30);
+				return { 'x': xp, 'y': yp };
+ 			};
+			
+		})( game, 10, 10);
+		
+		var deletedSquaresManager = {};
+		( function( d ) {
+			var squares = [];
+			
+			d.addSquare = function( sq ) {
+				squares[squares.length] = sq;
+			}
+			
+			d.update = function( event ) {
+				if( squares.length > 0 ) {
+					isNeedRedraw = true;
+				}
+				for( var i = squares.length-1; i >= 0; --i ) {
+					if( squares[i] != null ) {
+						squares[i].animate();
+						if( squares[i].isAnimateEnded() == true ) {
+							Pool.releaseElement( squares[ i ] );
+							squares.splice( i, 1 );
+						}
+					}
+				}
+			}
+			
+		})( deletedSquaresManager );
+		
+		var controller = {};
+		
+		( function( c, newCount ) {
+			var placeForNewFigures = {
+				'x': 15,
+				'y': 330
+			};
+			var newFigures = [];
+			
+			c.animateFigures = function( event ) {
+				for( var i = 0; i < newFigures.length; ++i ) {
+					if( newFigures[i].animate( event ) == true ) {
+						isNeedRedraw = true;
+					}
+				}
+			};
+			
+			c.addNewFigure = function( figure ) {
+				figure.setPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
+				figure.setInitialPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
+				newFigures[ newFigures.length ] = figure;
+				isNeedRedraw = true;
+			};
+			
+			c.pressmove = function( evt, data ) {
+				if( data.square.figure != null ) {
+					data.square.figure.stopMoveAnimation();
+					data.square.figure.addDeltaToPosition( evt.stageX - data.square.shape.x, evt.stageY - data.square.shape.y );
+					isNeedRedraw = true;
+				}
+			};
+			
+			c.pressup = function( evt, data ) {
+				if( data.square.figure != null ) {
+					var figure = data.square.figure;
+					
+					var squarePosition = figure.getTouchedSquarePosition( evt );
+					
+					var cellTouched = game.getCellByCrd( evt.stageX, evt.stageY );
+					if( cellTouched.x > -1 && cellTouched.y > -1 ) {
+						if( game.isCanAddFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y ) == true ) {
+							var result = game.addFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y );
+							
+							scoreHandler.addSquaresCount( result.addedCount );
+							
+							var deletedSquares = game.deleteFullLinesAndColumns( game.checkLines() );
+							
+							if( deletedSquares.length > 0 ) {
+								for( var i = 0; i < deletedSquares.length; ++i ) {
+									scoreHandler.add( deletedSquares[i].getScore() );
+									deletedSquaresManager.addSquare( deletedSquares[i] );
+								}
+							}
+							
+							newFigures.splice( newFigures.indexOf( figure ), 1 );
+							c.checkAndUpdateNewFigures();
+							
+							var isEnd = true;
+							for( var i = 0; i < newFigures.length; ++i ) {
+								if( game.isOneMoreFigureCanBePlaced( newFigures[ i ] ) == true ) {
+									isEnd = false;
+									break;
+								}
+							}
+							if( isEnd == true ) {
+								GameState.endGame();
+							}
+							
+							isNeedRedraw = true;
+							
+						} else {
+							figure.backToInitialPosition();
+						}
+					} else {
+						figure.backToInitialPosition();
+					}
+				}
+			};
+			
+			c.checkAndUpdateNewFigures = function() {
+				if( newFigures.length != 0 ) {
+					return;
+				}
+				
+				// add New figures
+				for( var i = 0; i < 3; ++i ) {
+					c.addNewFigure( FigureFactory.create() );
+				}
+			};
+			
+			c.clearNewFigures = function() {
+				for( var i = 0; i < newFigures.length; ++ i ) {
+					for( var y = 0; y < 3; ++y ) {
+						for( var x = 0; x < 3; ++x ) {
+							if( newFigures[i].squares[y * 3 + x] != null ) {
+								var square = newFigures[i].squares[ y * 3 + x ];
+								square.disableEvents();
+								square.figure = null;
+								Pool.releaseElement( square );
+							}
+						}
+					}
+				}
+				newFigures.splice( 0, newFigures.length );
+			};
+			
+		})( controller, 3 );
+		
+		var Square = function( color, figure ) {
+			this.color = 'red';
+			this.shape = new createjs.Shape();
+			this.figure = null;
+			this.animateCounter = 0;
+			this.score = 1;
+			this.inUse = false;
+		};
+		
+		Square.prototype.init = function( color, figure ) {
+			this.color = color;
+			this.shape.graphics.clear().beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
+			this.figure = figure;
+			this.animateCounter = 0;
+			this.score = 1;
+			stage.addChild( this.shape );
+			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
+			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
+            this.shape.on( 'touchmove', controller.pressmove, controller, false, {square: this } );
+		};
+		
+		Square.prototype.isInUse = function() {
+			return this.inUse;
+		};
+		
+		Square.prototype.animate = function() {
+			this.animateCounter = this.animateCounter + 1;
+			this.shape.graphics.clear().beginFill(this.color).drawRect(-15 + 15 / 20 * this.animateCounter, -15 + 15 / 20 * this.animateCounter, 30 - 30 / 20 * this.animateCounter, 30 - 30 / 20 * this.animateCounter);
+		};
+		
+		Square.prototype.isAnimateEnded = function() {
+			if( this.animateCounter > 20 ) {
+				return true;
+			}
+			return false;
+		};
+		
+		Square.prototype.release = function() {
+			stage.removeChild( this.shape );
+			this.inUse = false;
+		};
+		
+		Square.prototype.getScore = function() {
+			return this.score;
+		};
+		
+		Square.prototype.disableEvents = function() {
+			this.shape.off( 'pressmove', controller.pressmove );
+			this.shape.off( 'pressup', controller.pressup );
+            this.shape.off( 'touchmove', controller.pressmove );
+		};
+		
+		var Figure = function( color, pointArray, stage) {
+			this.squares = new Array(9);
+			this.x = 0;
+			this.y = 0;
+			this.initialX = 0;
+			this.initialY = 0;
+			this.isMovingToInitialPosition = false;
+			
+			this.dx = 0;
+			this.dy = 0;
+			
+			for( var i = 0; i < pointArray.length; ++i ) {
+				if( pointArray[i] ) {
+					//this.squares[i] = new Square( color, this);
+					this.squares[i] = Pool.getElement();
+					this.squares[i].init( color, this );
+				} else {
+					this.squares[i] = null;
+				}
+			}
+			
+			this.stopMoveAnimation = function() {
+				this.isMovingToInitialPosition = false;
+			}
+		};
+		
+		Figure.prototype.setPosition = function( x, y ) {
+			this.x = x;
+			this.y = y;
+			for( var yi = 0; yi < 3; ++yi ) {
+				for( var xi = 0; xi < 3; ++xi ) {
+					if( this.squares[yi * 3 + xi] != null) { 
+						this.squares[yi * 3 + xi].shape.x = this.x + 30 * xi;
+						this.squares[yi * 3 + xi].shape.y = this.y + 30 * yi;
+					}
+				}
+			}
+		};
+		
+		Figure.prototype.addDeltaToPosition = function( dx, dy ) {
+			this.setPosition( this.x + dx, this.y + dy );
+		};
+		
+		Figure.prototype.setInitialPosition = function( x, y ) {
+			this.initialX = x;
+			this.initialY = y;
+		};
+		
+		Figure.prototype.backToInitialPosition = function() {
+			this.dx = (this.initialX - this.x) / 5;
+			this.dy = (this.initialY - this.y) / 5;
+			this.isMovingToInitialPosition = true;
+		};
+		
+		Figure.prototype.getTouchedSquarePosition = function( evt ) {
+			var xp = 0, yp = 0;
+			for( var y = 0; y < 3; ++y ) {
+				for( var x = 0; x < 3; ++x ) {
+					if( this.squares[y * 3 + x] != null ) {
+						var sq = this.squares[ y * 3 + x ];
+						if( sq.shape.x <= evt.stageX && sq.shape.x + 30 > evt.stageX ) {
+							xp = x;
+						}
+						if( sq.shape.y <= evt.stageY && sq.shape.y + 30 > evt.stageY ) {
+							yp = y;
+						}
+					}
+				}
+			}
+			return { 'x' : xp, 'y' : yp };
+		};
+		
+		Figure.prototype.animate = function( event ) {
+			if( this.isMovingToInitialPosition == true ) {
+				this.setPosition( this.x + this.dx, this.y + this.dy );
+				
+				if( Math.abs( this.x - this.initialX ) < 2 ) {
+					this.setPosition( this.initialX, this.initialY );
+					this.isMovingToInitialPosition = false;
+				}
+				return true;
+			}
+			return false;
+		};
+		
+		Figure.prototype.getFirstSquarePosition = function() {
+			for( var y = 0; y < 3; ++y ) {
+				for( var x = 0; x < 3; ++x ) {
+					if( this.squares[y * 3 + x] != null ) {
+						return { 'x' : x, 'y' : y };
+					}
+				}
+			}
+			return { 'x':0, 'y':0 };
+		};
+		
+		var board;
+		var circle;
+		
+		var scoreHandler = {};
+		( function( s ) {
+			var score = 0;
+			var addedSquaresCount = 0;
+			s.reset = function() {
+				s.set( 0 );
+				s.setSquaresCount( 0 );
+			};
+			s.add = function( count ) {
+				s.set( score + count );
+			};
+			s.set = function( count ) {
+				score = count;
+				$("#scoreLabel").text("Удалено: " + score );
+			};
+			s.getScore = function( ) {
+				return score;
+			};
+			s.addSquaresCount = function( count ) {
+				s.setSquaresCount( addedSquaresCount + count );
+			};
+			s.getSquaresCount = function() {
+				return addedSquaresCount;
+			};
+			s.setSquaresCount = function( count ) {
+				addedSquaresCount = count;
+				$("#addedSquaresCount").text("Установлено: " + addedSquaresCount );
+			}
+		})( scoreHandler );
+		
+		var FigureFactory = {};
+		
+		( function( f ) {
+		
+			var colors = ['lightcoral', 'chocolate', 'yellowgreen', 'limegreen', 'darkturquoise', 'dodgerblue', 'mediumvioletred' ];
+			//var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
+			//				[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
+			//				[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
+			//				[0,0,1,0,0,1,0,1,1], [1,0,0,1,0,0,1,1,0]];
+			var forms = [	[0,1,0,0,1,0,0,1,1], [0,1,0,0,1,0,1,1,0], [0,1,1,0,1,0,0,1,0], [1,1,0,0,1,0,0,1,0],
+							[1,0,0,1,1,1,0,0,0], [0,0,1,1,1,1,0,0,0], [0,0,0,1,1,1,1,0,0], [0,0,0,1,1,1,0,0,1],
+							[0,1,0,1,1,1,0,0,0], [0,0,0,1,1,1,0,1,0], [0,1,0,1,1,0,0,1,0], [0,1,0,0,1,1,0,1,0],
+							[0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0],
+							[0,0,0,0,1,0,0,0,0], [1,1,1,1,1,1,1,1,1]
+						];
+		
+			f.create = function() {
+				var fig = new Figure( colors[ getRandomInt( 0, colors.length - 1 )], forms[ getRandomInt( 0, forms.length - 1 ) ] );
+				return fig;
+			};
+		})( FigureFactory );
+		
+		var Pool = {};
+		( function(p) {
+			var pool = [];
+			var poolSize = 0;
+			
+			p.expandPool = function(count) {
+				for( var i = 0; i < count - poolSize; ++i ) {
+					pool.push( new Square() );
+				}
+				poolSize = count;
+			};
+			
+			p.getElement = function() {
+				if( poolSize == 0 ) {
+					p.expandPool( 2 );
+				}
+				if( pool[ poolSize - 1 ].isInUse() == true ) {
+					p.expandPool( poolSize * 2 );
+				}
+				pool.unshift( pool.pop() );
+				pool[ 0 ].inUse = true;
+				return pool[ 0 ];
+			};
+			
+			p.releaseElement = function( square ) {
+				square.release();
+				var index = pool.indexOf( square );
+				pool.push((pool.splice( index, 1))[0]);
+			};
+			
+		})( Pool );
+		
+            function init(){
+				stage = new createjs.Stage("gameCanvas");
+                createjs.Touch.enable(stage);
+				board = new createjs.Shape();
+				board.graphics.beginStroke("black");
+				var dx = 30;
+				for( var i = 0; i < 11; ++i ) {
+					board.graphics.moveTo(0 + 15, i * dx).lineTo(dx * 10 + 15, i * dx);
+					board.graphics.moveTo(dx * i + 15, 0).lineTo(dx * i + 15, dx * 10);
+				}
+				board.graphics.endStroke();
+				stage.addChild(board);
+				
+				console.log( "start" );
+				
+				Pool.expandPool( 10 * 10 * 2 + 3 * 9 );
+				
+				createjs.Ticker.on( "tick", tick );
+				createjs.Ticker.setFPS( 30 );
+			}
+			
+			function tick( event ) {
+				controller.animateFigures( event );
+				deletedSquaresManager.update( event );
+				if( isNeedRedraw == true ) {
+					stage.update();
+					isNeedRedraw = false;
+				}
+			}
+			
+			function showResultScreen() {
+				$("#squaresCountLable").text("Установлено квадратов: " + scoreHandler.getSquaresCount());
+				$("#deletedSquaresCountLable").text("Удалено квадратов: " + scoreHandler.getScore());
+				$("#main").slideUp(400, function(){
+					$("#endGameScreen").slideDown();
+				});
+			}
+			
+			function showGameScreen() {
+				$("#endGameScreen").slideUp(400, function(){
+					$("#main").slideDown(400, function() {
+						GameState.startGame();
+					});
+				});
+			}
+			
+			function showGameScreenFromWelcome() {
+				$("#welcomeScreen").slideUp(400, function(){
+					$("#main").slideDown(400, function() {
+						GameState.startGame();
+					});
+				});
+			}
+			
+			function showHelpScreen() {
+				$("#welcomeScreen").slideUp( 400, function() {
+					$("#infoScreen").slideDown(400, function() {
+					});
+				});
+			}
+			
+			function showWelcomeScreen() {
+				$("#infoScreen").slideUp( 400, function() {
+					$("#welcomeScreen").slideDown(400, function() {
+					});
+				});
+			}
+			
+			$(document).ready(function(){
+                VK.init( function() {
+                    console.log( "vk init ok" );
+                }, function() {
+                    console.log( "vk init fail" );
+                }, '5.29' );
+                
+				init();
+				
+				$("#startButton").click( function() {
+					GameState.startGame();
+					//showResultScreen();
+				});
+				
+				$("#restartButton").click( showGameScreen );
+				$("#welcomeStartButton").click( showGameScreenFromWelcome );
+				$("#showHelpButton").click( showHelpScreen );
+				$("#infoScreenBackButton").click( showWelcomeScreen );
+				
+				//$("welcomeScreen").hide();
+				$("#endGameScreen").hide();
+				$("#main").hide();
+				$("#infoScreen").hide();
+			});
+        </script>
+    </head>
+    <body>
+		<div id="main" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div id="content">
+				<div id="box1">
+					<canvas id="gameCanvas" width="330" height="420"></canvas>
+				</div>
+				<div id="box2">
+					тут будет список друзей
+				</div>
+			</div>
+			<div id="footer">
+				<button id="startButton">Начать игру</button>
+				<div id="scoreLabel">Score: 0</div>
+				<div id="addedSquaresCount">Score1: 0</div>
+			</div>
+		</div>
+		
+		<div id="endGameScreen" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div class="contentVertical">
+				<div id="scoreResult" class="curved">
+					<p class="font1">Игра закончена, Ваши результаты:</p>
+					<p id="squaresCountLable" class="font2">Your result: 100</p>
+					<p id="deletedSquaresCountLable" class="font2"></p>
+				</div>
+				<div id="buttons" class="curved">
+					<button id="restartButton">Попробовать ещё раз</button>
+					<button id="share">Поделиться результатом</button>
+				</div>
+			</div>
+			<div id="footer"></div>
+		</div>
+		
+		<div id="welcomeScreen" class="mainContainer">
+			<div id="header">SimpleSquares game</div>
+			<div class="contentVertical">
+				<div id="startBlock" class="curved">
+					<p align="center" class="font1">SimpleSquares</p>
+					<p align="center" class="font2">Простая игра о квадратах и квадратами</p>
+					<p align="center"><button id="welcomeStartButton">Играть</button></p>
+				</div>
+			</div>
+			<div id="footer">
+				<button id="showHelpButton">Об игре</button>
+				<button>Пригласить друзей</button>
+			</div>
+		</div>
+		
+		<div id="infoScreen" class="mainContainer">
+			<div id="header">SimpleSquares game: справка</div>
+			<div class="contentVertical">
+				<div id="helpBlock" class="curved">
+					<p align="center" class="font2">
+					Целью игры является расположение максимального числа фигур из квадратов на игровом поле. При заполнении строки или столбца - квадраты удаляются.
+					</p>
+					<p align="center"><button id="infoScreenBackButton">Ok</button></p>
+				</div>
+			</div>
+			<div id="footer"></div>
+		</div>
+    </body>
+</html>
