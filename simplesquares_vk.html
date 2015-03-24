@@ -27,7 +27,7 @@
             var gameCount = parseUser.get("gamePlayedCount");
             parseUser.set("gamePlayedCount", gameCount + 1);
             
-            user.save( null, {
+            parseUser.save( null, {
                 success: function(user) {
                     console.log("new data saved");
                 },
