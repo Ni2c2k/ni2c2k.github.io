@@ -632,6 +632,27 @@
 			$(document).ready(function(){
                 VK.init( function() {
                     console.log( "vk init ok" );
+                    
+                    var parts=document.location.search.substr(1).split("&");
+                    console.log('parts');
+                    console.log(parts);
+                    
+                    var flashVars = {}, curr;
+                    for( var i = 0; i < parts.length; ++i ) {
+                        curr = parts[i].split('=');
+                        flashVars[curr[0]] = curr[1];
+                    }
+                    
+                    console.log("viewer_id = " + flashVars['viewer_id']);
+                    
+                    VK.api('users.get', {fields:'country'}, function(data) {
+                        if( data.response ) {
+                            console.log(data.response);
+                        } else {
+                            console.log('error');
+                        }
+                    });
+                    
                 }, function() {
                     console.log( "vk init fail" );
                 }, '5.29' );
