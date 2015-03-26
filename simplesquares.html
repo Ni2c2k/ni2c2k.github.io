@@ -121,6 +121,7 @@
 								cells[ypos + y - figurey][xpos + x - figurex].shape.y = (ypos + y - figurey) * 30 + 15;
 								cells[ypos + y - figurey][xpos + x - figurex].disableEvents();
 								cells[ypos + y - figurey][xpos + x - figurex].figure = null;
+                                stage.setChildIndex( cells[ypos + y - figurey][xpos + x - figurex].shape, 1 );
 								squareCounts += 1;
 							}
 						}
