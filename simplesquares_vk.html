@@ -665,6 +665,23 @@
                     if( data.response ) {
                         console.log("friends.getAppUsers");
                         console.log(data.response);
+                        
+                        
+                        // retrieve data from parse
+                        var query = new Parse.Query(Parse.User);
+                        query.containedIn( "username", data.response );
+                        query.descending("addedCount");
+                        query.limit(10);
+                        quey.find({
+                            success: function(result) {
+                                console.log( result );
+                            },
+                            error: function(error) {
+                                console.log("Error: " + error.code + " " + error.message );
+                            }
+                        });
+                        
+                        
                     } else {
                         console.log("error friends.getAppUsers");
                     }   
