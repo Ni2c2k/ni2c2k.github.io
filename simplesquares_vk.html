@@ -672,7 +672,7 @@
                         query.containedIn( "username", data.response );
                         query.descending("addedCount");
                         query.limit(10);
-                        quey.find({
+                        query.find({
                             success: function(result) {
                                 console.log( result );
                             },
