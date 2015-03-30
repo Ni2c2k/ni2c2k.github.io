@@ -660,6 +660,10 @@
             var vk_user_id = null;
             var parseUser = null;
             
+            function fillFriendsTopList( data ) {
+                
+            }
+            
             function initAfterLogin() {
                 VK.api('friends.getAppUsers', {}, function(data) {
                     if( data.response ) {
@@ -680,6 +684,15 @@
                         query.find({
                             success: function(result) {
                                 console.log( result );
+                                // form ids list
+                                
+                                var ids = [];
+                                for( var i = 0; i < result.length; ++i ) {
+                                    ids.push( parseInt(result[i].username) );
+                                }
+                                
+                                console.log("ids:");
+                                console.log(ids);
                             },
                             error: function(error) {
                                 console.log("Error: " + error.code + " " + error.message );
