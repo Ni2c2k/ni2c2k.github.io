@@ -688,11 +688,22 @@
                                 
                                 var ids = [];
                                 for( var i = 0; i < result.length; ++i ) {
-                                    ids.push( parseInt(result[i].get("username") ) );
+                                    //ids.push( parseInt(result[i].get("username") ) );
+                                    ids.push( result[i].get("username") );
                                 }
                                 
                                 console.log("ids:");
                                 console.log(ids);
+                                
+                                
+                                Vk.api('users.get', {'user_ids': ids, 'fields' :'country'}, function(data) {
+                                    if( data.response ) {
+                                        console.log( data.response );
+                                    } else {
+                                        console.log('user.get error');
+                                    }
+                                });
+                                
                             },
                             error: function(error) {
                                 console.log("Error: " + error.code + " " + error.message );
