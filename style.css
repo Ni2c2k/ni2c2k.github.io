@@ -1,6 +1,7 @@
 body {
 	background: moccasin;
 	margin: 0;
+    font-family: tahoma, arial, verdana, sans-serif, Lucida Sans;
 }
 
 .mainContainer {
@@ -44,6 +45,7 @@ body {
 	align-items: center;
 }
 
+
 #footer {
 	background:darkturquoise;
 	width: 100%;
@@ -67,8 +69,6 @@ body {
 }
 
 #box2 {
-	border: 1px black solid;
-	/*background: green;*/
 	display: -moz-box;
 	-moz-box-pack: center;
 	-moz-box-flex: 0;
@@ -127,4 +127,57 @@ body {
 .font2 {
 	font-size: 12px;
 	font-family: sans-serif;
+}
+
+
+.user_table {
+    position: relative;
+    font-size: 12px;
+    text-align: left;
+}
+
+.user_image {
+    padding: 5px 0px;
+    position: absolute;
+    top: 0px;
+    width: 50px;
+}
+
+.user_info {
+    margin-left: 60px;
+    padding: 0px 0px 2px;
+    min-height: 60px;
+    text-align: left;
+}
+
+.user_text {
+    padding: 5px 0px 0px 4px;
+    margin-left: -4px;
+    position: relative;
+    text-align: left;
+}
+
+.user_text_name {
+    overflow: hidden;
+    text-align: left;
+}
+
+.user_name {
+    outline: medium none;
+    font-weight: bold;
+    line-height: 140%;
+    
+    color: blue;
+    text-align: left;
+}
+
+.user_score_info {
+    text-align: left;
+}
+
+.user_score_info_text {
+    overflow: hidden;
+    word-wrap: break-word;
+    padding-top: 2px;
+    padding-bottom: 1px;
 }

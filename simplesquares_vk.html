@@ -665,7 +665,7 @@
             }
             
             function fillFriendsTopListEmpty() {
-                
+                //$("#box2").text("Нет результатов друзей");
             }
             
             function initAfterLogin() {
@@ -728,7 +728,7 @@
             }
             
 			$(document).ready(function(){
-                
+                fillFriendsTopListEmpty();
                 Parse.initialize("H12S6M74DgahufnWJlkucKtDY0PJKJjMKUu2LGHA", "NDCiafWAvNWtwlmhGxXFif8AcyARC0EYQlVLeaaE");
                 
                 VK.init( function() {
@@ -819,7 +819,58 @@
 					<canvas id="gameCanvas" width="330" height="420"></canvas>
 				</div>
 				<div id="box2">
-					тут будет список друзей
+                    <div>
+                        Результаты друзей:
+                    </div>
+                    <div id="friendTopList">
+                        
+                        <div class="user_table">
+                            <div class="user_image">
+                                <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
+                            </div>
+                            <div class="user_info">
+                                <div class="user_text">
+                                    <div class="user_text_name">
+                                        <div class="user_name">
+                                            Ершов Николай
+                                        </div>
+                                    </div>
+                                    <div class="user_score_info">
+                                        <div class="user_score_info_text">
+                                            Установлено: 2000
+                                        </div>
+                                        <div class="user_score_info_text">
+                                            Удалено: 1423
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="user_table">
+                            <div class="user_image">
+                                <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
+                            </div>
+                            <div class="user_info">
+                                <div class="user_text">
+                                    <div class="user_text_name">
+                                        <div class="user_name">
+                                            Ершов Николай
+                                        </div>
+                                    </div>
+                                    <div class="user_score_info">
+                                        <div class="user_score_info_text">
+                                            Установлено: 2000
+                                        </div>
+                                        <div class="user_score_info_text">
+                                            Удалено: 1423
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                    
+                    
+                    </div>
 				</div>
 			</div>
 			<div id="footer">
