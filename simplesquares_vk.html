@@ -666,10 +666,15 @@
                         console.log("friends.getAppUsers");
                         console.log(data.response);
                         
+                        var convinientUsers = [];
+                        for( var i = 0; i < data.response.length; ++i ) {
+                            convinientUsers.push( String( data.response[i] ));
+                        }
+                        console.log( convinientUsers );
                         
                         // retrieve data from parse
                         var query = new Parse.Query(Parse.User);
-                        query.containedIn( "username", data.response );
+                        query.containedIn( "username", convinientUsers );
                         query.descending("addedCount");
                         query.limit(10);
                         query.find({
