@@ -661,6 +661,14 @@
             var parseUser = null;
             
             function initAfterLogin() {
+                VK.api('friends.getAppUsers', {}, function(data) {
+                    if( data.response ) {
+                        console.log("friends.getAppUsers");
+                        console.log(data.response);
+                    } else {
+                        console.log("error friends.getAppUsers");
+                    }   
+                });
             }
             
 			$(document).ready(function(){
@@ -694,6 +702,7 @@
                     var user = new Parse.User.logIn(vk_user_id, vk_user_id , {
                         success: function( user ) {
                             parseUser = user;
+                            initAfterLogin();
                         },
                         error: function( user, error ) {
                             console.log('error: ' + error.code + ' ' + error.message );
@@ -710,6 +719,7 @@
                                     success: function( user ) {
                                         console.log('new user signed up');
                                         parseUser = user;
+                                        initAfterLogin();
                                     },
                                     error: function( user, error ) {
                                         console.log("error new user signed up");
