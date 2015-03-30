@@ -696,7 +696,7 @@
                                 console.log(ids);
                                 
                                 
-                                VK.api('users.get', {'user_ids': ids, 'fields' :'country'}, function(data) {
+                                VK.api('users.get', {'user_ids': ids, 'fields' :'photo_50'}, function(data) {
                                     if( data.response ) {
                                         console.log( data.response );
                                     } else {
