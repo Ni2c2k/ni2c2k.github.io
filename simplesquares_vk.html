@@ -676,7 +676,7 @@
                             console.log( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ) );
                             if( isFirst == 1 ) {
                                 isFirst = 0;
-                                $("friendTopList").set( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ));
+                                $("friendTopList").text( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ));
                             } else {
                                 $("friendTopList").append( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ));
                             }
@@ -688,7 +688,7 @@
             }
             
             function fillFriendsTopListEmpty() {
-                $("friendTopList").set("Нет результатов друзей");
+                $("friendTopList").text("Нет результатов друзей");
                 //$("#box2").text("Нет результатов друзей");
             }
             
