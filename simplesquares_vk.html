@@ -9,6 +9,31 @@
         <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
         <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.3.5.min.js"></script>
+        <script id="friend_item_template" type="text/x-handlebars-template">
+            <div class = "friend_item">
+                <div class ="user_image">
+                    <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
+                </div>
+                <div class="user_info">
+                    <div class="user_text">
+                        <div class="user_text_name">
+                            <div class="user_name">
+                                {{name}}
+                            </div>
+                        </div>
+                        <div class="user_score_info">
+                            <div class="user_score_info_text">
+                                Установлено: {{addedCount}}
+                            </div>
+                            <div class="user_score_info_text">
+                                Удалено: {{deletedCount}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </script>
+        
         <script type="text/javascript">
 		
 		var stage;
@@ -666,21 +691,24 @@
                 console.log( "\t vkData\n" );
                 console.log( vkData );
                 
+                var source = $("#friend_item_template").html();
+                var template = Handlebars.compile(source);
+                
                 // get item from vkData, find added count by id, retrieveAddedCount
                 
-                var isFirst = 1;
+                var context = {name: "name", addedCount: "100", deletedCount: "20" };
                 
                 for( var i = 0; i < vkData.length; ++i ) {
                     for( var j = 0; j < parseData.length; ++j ) {
                         if( vkData[ i ].id == parseData[ i ].get("username") ) {
                             console.log( "vkData.id = " + vkData[ i ].id + " username = " + parseData[ i ].get("username" ) );
                             console.log( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ) );
-                            if( isFirst == 1 ) {
-                                isFirst = 0;
-                                $("friendTopList").text( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ));
-                            } else {
-                                $("friendTopList").append( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ));
-                            }
+                            context.name = vkData[i].first_name + " " + vkData[i].last_name;
+                            context.addedCount = parseData[ i ].get("addedCount");
+                            context.deletedCount = parseData[ i ].get("deletedCount");
+                            
+                            $("friendTopList").append( template( context ) );
+                            
                             break;
                         }
                     }
@@ -850,29 +878,6 @@
                     </div>
                     <div id="friendTopList">
                         
-                        <div class="user_table">
-                            <div class="user_image">
-                                <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
-                            </div>
-                            <div class="user_info">
-                                <div class="user_text">
-                                    <div class="user_text_name">
-                                        <div class="user_name">
-                                            Ершов Николай
-                                        </div>
-                                    </div>
-                                    <div class="user_score_info">
-                                        <div class="user_score_info_text">
-                                            Установлено: 2000
-                                        </div>
-                                        <div class="user_score_info_text">
-                                            Удалено: 1423
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="user_table">
                             <div class="user_image">
                                 <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
