@@ -664,6 +664,18 @@
                 console.log( "fillFriendsTopList:\n");
                 console.log( "\t vkData\n" );
                 console.log( vkData );
+                
+                // get item from vkData, find added count by id, retrieveAddedCount
+                
+                for( var i = 0; i < vkData.length; ++i ) {
+                    for( var j = 0; j < parseData.length; ++j ) {
+                        if( vkData[ i ].id == parseData[ i ].get("username") ) {
+                            console.log( "vkData.id = " + vkData[ i ].id + " username = " + parseData[ i ].get("username" ) );
+                            break;
+                        }
+                    }
+                }
+                
             }
             
             function fillFriendsTopListEmpty() {
