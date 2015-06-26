@@ -691,7 +691,7 @@
                 $("#squaresCountLable").text("Установлено квадратов: " + scoreHandler.getSquaresCount());
 				$("#deletedSquaresCountLable").text("Удалено квадратов: " + scoreHandler.getScore());
                 
-                var message = "Мой результат в игре https://vk.com/app4837282 \nУстановлено квадратов: " + scoreHandler.getSquaresCount() + "\nУдалено квадратов: " + scoreHandler.getScore();
+                var message = "Мой результат в игре Простые Квадраты\nУстановлено квадратов: " + scoreHandler.getSquaresCount() + "\nУдалено квадратов: " + scoreHandler.getScore() + "\nСможешь побить его? https://vk.com/app4837282";
                 
                 VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : message }, function(data) {
                     if( data.response ) {
@@ -704,9 +704,9 @@
             }
             
             function fillFriendsTopList( vkData, parseData ) {
-                console.log( "fillFriendsTopList:\n");
-                console.log( "\t vkData\n" );
-                console.log( vkData );
+                //console.log( "fillFriendsTopList:\n");
+                //console.log( "\t vkData\n" );
+                //console.log( vkData );
                 
                 $("#friendTopList").text("");
                 
@@ -719,8 +719,8 @@
                 for( var i = 0; i < vkData.length; ++i ) {
                     for( var j = 0; j < parseData.length; ++j ) {
                         if( vkData[ i ].id == parseData[ i ].get("username") ) {
-                            console.log( "vkData.id = " + vkData[ i ].id + " username = " + parseData[ i ].get("username" ) );
-                            console.log( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ) );
+                            //console.log( "vkData.id = " + vkData[ i ].id + " username = " + parseData[ i ].get("username" ) );
+                            //console.log( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ) );
                             context.pic = vkData[i].photo_50;
                             context.name = vkData[i].first_name + " " + vkData[i].last_name;
                             context.addedCount = parseData[ i ].get("addedCount");
@@ -742,15 +742,15 @@
             function initAfterLogin() {
                 VK.api('friends.getAppUsers', {}, function(data) {
                     if( data.response ) {
-                        console.log("friends.getAppUsers");
-                        console.log(data.response);
+                        //console.log("friends.getAppUsers");
+                        //console.log(data.response);
                         
                         var convinientUsers = [];
                         for( var i = 0; i < data.response.length; ++i ) {
                             convinientUsers.push( String( data.response[i] ));
                         }
-                        console.log( "convenient users:\n" );
-                        console.log( convinientUsers );
+                        //console.log( "convenient users:\n" );
+                        //console.log( convinientUsers );
                         
                         // retrieve data from parse
                         var query = new Parse.Query(Parse.User);
@@ -768,18 +768,18 @@
                                     ids.push( result[i].get("username") );
                                 }
                                 
-                                console.log("ids:");
-                                console.log(ids);
+                                //console.log("ids:");
+                                //console.log(ids);
                                 
                                 
                                 VK.api('users.get', {'user_ids': ids, 'fields' :'photo_50'}, function(data) {
                                     if( data.response ) {
-                                        console.log( data.response );
+                                        //console.log( data.response );
                                         
                                         fillFriendsTopList( data.response, result );
                                         
                                     } else {
-                                        console.log('user.get error');
+                                        //console.log('user.get error');
                                         fillFriendsTopListEmpty();
                                     }
                                 });
@@ -807,8 +807,8 @@
                     console.log( "vk init ok" );
                     
                     var parts=document.location.search.substr(1).split("&");
-                    console.log('parts');
-                    console.log(parts);
+                    //console.log('parts');
+                    //console.log(parts);
                     
                     var flashVars = {}, curr;
                     for( var i = 0; i < parts.length; ++i ) {
@@ -816,12 +816,12 @@
                         flashVars[curr[0]] = curr[1];
                     }
                     
-                    console.log("viewer_id = " + flashVars['viewer_id']);
+                    //console.log("viewer_id = " + flashVars['viewer_id']);
                     vk_user_id = flashVars['viewer_id'];
                     
                     VK.api('users.get', {'user_ids': flashVars['viewer_id'], 'fields' :'country'}, function(data) {
                         if( data.response ) {
-                            console.log(data.response);
+                            //console.log(data.response);
                         } else {
                             console.log('error');
                         }
