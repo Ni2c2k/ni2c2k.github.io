@@ -661,7 +661,9 @@
             var parseUser = null;
             
             function fillFriendsTopList( vkData, parseData ) {
-                
+                console.log( "fillFriendsTopList:\n");
+                console.log( "\t vkData\n" );
+                console.log( vkData );
             }
             
             function fillFriendsTopListEmpty() {
@@ -678,6 +680,7 @@
                         for( var i = 0; i < data.response.length; ++i ) {
                             convinientUsers.push( String( data.response[i] ));
                         }
+                        console.log( "convenient users:\n" );
                         console.log( convinientUsers );
                         
                         // retrieve data from parse
