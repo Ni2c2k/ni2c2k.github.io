@@ -691,7 +691,7 @@
                 console.log( "\t vkData\n" );
                 console.log( vkData );
                 
-                $("#friendTopList").text("Нет результатов друзей");
+                $("#friendTopList").text("");
                 
                 var source = $("#friend_item_template").html();
                 var template = Handlebars.compile(source);
@@ -708,7 +708,7 @@
                             context.addedCount = parseData[ i ].get("addedCount");
                             context.deletedCount = parseData[ i ].get("deletedCount");
                             
-                            //$("#friendTopList").append( template( context ) );
+                            $("#friendTopList").append( template( context ) );
                             
                             break;
                         }
