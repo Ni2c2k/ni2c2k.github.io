@@ -716,8 +716,17 @@
                     }
                 }
                 
+                VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : 'test' }, function(data) {
+                    if( data.response ) {
+                        console.log(' wall post responce' );
+                        console.log( data.response );
+                    } else {
+                        console.log( 'wall post error' );
+                    }
+                });
+                
             }
-            
+                                
             function fillFriendsTopListEmpty() {
                 $("#friendTopList").text("Нет результатов друзей");
                 //$("#box2").text("Нет результатов друзей");
