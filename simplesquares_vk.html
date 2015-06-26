@@ -691,12 +691,13 @@
                 console.log( "\t vkData\n" );
                 console.log( vkData );
                 
+                $("#friendTopList").text("Нет результатов друзей");
+                
                 var source = $("#friend_item_template").html();
                 var template = Handlebars.compile(source);
+                var context = {name: "name", addedCount: "100", deletedCount: "20" };
                 
                 // get item from vkData, find added count by id, retrieveAddedCount
-                
-                var context = {name: "name", addedCount: "100", deletedCount: "20" };
                 
                 for( var i = 0; i < vkData.length; ++i ) {
                     for( var j = 0; j < parseData.length; ++j ) {
@@ -707,7 +708,7 @@
                             context.addedCount = parseData[ i ].get("addedCount");
                             context.deletedCount = parseData[ i ].get("deletedCount");
                             
-                            $("#friendTopList").append( template( context ) );
+                            //$("#friendTopList").append( template( context ) );
                             
                             break;
                         }
@@ -717,7 +718,7 @@
             }
             
             function fillFriendsTopListEmpty() {
-                $("friendTopList").text("Нет результатов друзей");
+                $("#friendTopList").text("Нет результатов друзей");
                 //$("#box2").text("Нет результатов друзей");
             }
             
