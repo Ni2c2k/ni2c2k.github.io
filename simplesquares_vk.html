@@ -693,7 +693,7 @@
                 
                 var message = "Мой результат в игре https://vk.com/app4837282 \nУстановлено квадратов: " + scoreHandler.getSquaresCount() + "\nУдалено квадратов: " + scoreHandler.getScore();
                 
-                VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : 'test' }, function(data) {
+                VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : message }, function(data) {
                     if( data.response ) {
                         console.log(' wall post responce' );
                         console.log( data.response );
