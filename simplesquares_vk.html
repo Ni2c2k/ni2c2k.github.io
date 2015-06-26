@@ -12,7 +12,7 @@
         <script id="friend_item_template" type="text/x-handlebars-template">
             <div class = "user_table">
                 <div class ="user_image">
-                    <img src="https://pp.vk.me/c311620/v311620452/3d68/y8kxOkBLmUs.jpg"></img>
+                    <img src="{{pic}}"></img>
                 </div>
                 <div class="user_info">
                     <div class="user_text">
@@ -695,7 +695,7 @@
                 
                 var source = $("#friend_item_template").html();
                 var template = Handlebars.compile(source);
-                var context = {name: "name", addedCount: "100", deletedCount: "20" };
+                var context = {pic: "pic", name: "name", addedCount: "100", deletedCount: "20" };
                 
                 // get item from vkData, find added count by id, retrieveAddedCount
                 
@@ -704,6 +704,7 @@
                         if( vkData[ i ].id == parseData[ i ].get("username") ) {
                             console.log( "vkData.id = " + vkData[ i ].id + " username = " + parseData[ i ].get("username" ) );
                             console.log( vkData[i].first_name + " " + vkData[i].last_name + " " + parseData[ i ].get("addedCount" ) );
+                            context.pic = vkData[i].photo_50;
                             context.name = vkData[i].first_name + " " + vkData[i].last_name;
                             context.addedCount = parseData[ i ].get("addedCount");
                             context.deletedCount = parseData[ i ].get("deletedCount");
