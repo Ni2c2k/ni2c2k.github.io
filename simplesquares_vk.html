@@ -686,6 +686,23 @@
             var vk_user_id = null;
             var parseUser = null;
             
+            function shareResultWallPost() {
+                
+                $("#squaresCountLable").text("Установлено квадратов: " + scoreHandler.getSquaresCount());
+				$("#deletedSquaresCountLable").text("Удалено квадратов: " + scoreHandler.getScore());
+                
+                var message = "Мой результат в игре https://vk.com/app4837282 \nУстановлено квадратов: " + scoreHandler.getSquaresCount() + "\nУдалено квадратов: " + scoreHandler.getScore();
+                
+                VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : 'test' }, function(data) {
+                    if( data.response ) {
+                        console.log(' wall post responce' );
+                        console.log( data.response );
+                    } else {
+                        console.log( 'wall post error' );
+                    }
+                });
+            }
+            
             function fillFriendsTopList( vkData, parseData ) {
                 console.log( "fillFriendsTopList:\n");
                 console.log( "\t vkData\n" );
@@ -715,18 +732,8 @@
                         }
                     }
                 }
-                
-                VK.api('wall.post', { 'owner_id': vk_user_id, 'message' : 'test' }, function(data) {
-                    if( data.response ) {
-                        console.log(' wall post responce' );
-                        console.log( data.response );
-                    } else {
-                        console.log( 'wall post error' );
-                    }
-                });
-                
             }
-                                
+            
             function fillFriendsTopListEmpty() {
                 $("#friendTopList").text("Нет результатов друзей");
                 //$("#box2").text("Нет результатов друзей");
@@ -869,6 +876,7 @@
 				$("#welcomeStartButton").click( showGameScreenFromWelcome );
 				$("#showHelpButton").click( showHelpScreen );
 				$("#infoScreenBackButton").click( showWelcomeScreen );
+                $("#shareButton").click( shareResultWallPost );
 
 				$("#endGameScreen").hide();
 				$("#main").hide();
@@ -908,7 +916,7 @@
 				</div>
 				<div id="buttons" class="curved">
 					<button id="restartButton">Попробовать ещё раз</button>
-					<button id="share">Поделиться результатом</button>
+					<button id="shareButton">Поделиться результатом</button>
 				</div>
 			</div>
 			<div id="footer"></div>
