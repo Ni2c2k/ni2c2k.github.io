@@ -9,6 +9,8 @@
         <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
         <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.3.5.min.js"></script>
+        <link href="https://cdn.muicss.com/mui-0.1.14/css/mui.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.muicss.com/mui-0.1.14/js/mui.min.js"></script>
         <script id="friend_item_template" type="text/x-handlebars-template">
             <div class = "user_table">
                 <div class ="user_image">
@@ -568,8 +570,8 @@
 		
 		( function( f ) {
 		
-			var colors = ['lightcoral', 'chocolate', 'yellowgreen', 'limegreen', 'darkturquoise', 'dodgerblue', 'mediumvioletred' ];
-            
+			//var colors = ['lightcoral', 'chocolate', 'yellowgreen', 'limegreen', 'darkturquoise', 'dodgerblue', 'mediumvioletred' ];
+            var colors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#8BC34A', '#FFC107', '#FF9800', '#FF5722' ];
             var forms = [   [0,0,0,0,1,0,0,0,0], [0,0,0,0,1,1,0,1,1], [1,1,1,1,1,1,1,1,1],
                             [1,1,1,0,0,1,0,0,1], [1,1,1,1,0,0,1,0,0], [0,0,1,0,0,1,1,1,1], [1,0,0,1,0,0,1,1,1],
                             [0,0,0,0,1,1,0,0,1], [0,0,0,1,1,0,1,0,0], [0,0,0,1,0,0,1,1,0], [0,0,0,0,0,1,0,1,1],
@@ -735,7 +737,7 @@
             }
             
             function fillFriendsTopListEmpty() {
-                $("#friendTopList").text("Нет результатов друзей");
+                $("#friendTopList").text("Друзья ещё не играли");
                 //$("#box2").text("Нет результатов друзей");
             }
             
@@ -886,28 +888,29 @@
     </head>
     <body>
 		<div id="main" class="mainContainer">
-			<div id="header">Простые квадраты</div>
+			<div id="header" class="mui-text-subhead mui-text-white">Простые квадраты</div>
 			<div id="content">
 				<div id="box1">
 					<canvas id="gameCanvas" width="330" height="420"></canvas>
 				</div>
 				<div id="box2">
-                    <div>
+                    <div class="mui-text-subhead mui-text-black">
                         Результаты друзей:
                     </div>
-                    <div id="friendTopList">  
+                    <div class="mui-divider"></div>
+                    <div id="friendTopList" class="mui-text-body2 mui-text-black">  
                     </div>
 				</div>
 			</div>
 			<div id="footer">
-				<button id="startButton">Начать игру</button>
-				<div id="scoreLabel">Score: 0</div>
-				<div id="addedSquaresCount">Score1: 0</div>
+				<button class="mui-btn mui-btn-primary" id="startButton">Начать игру</button>
+				<div class="mui-text-subhead mui-text-black" id="scoreLabel">Score: 0</div>
+				<div class="mui-text-subhead mui-text-black" id="addedSquaresCount">Score1: 0</div>
 			</div>
 		</div>
 		
 		<div id="endGameScreen" class="mainContainer">
-			<div id="header">Простые квадраты</div>
+			<div id="header" class="mui-text-subhead mui-text-white">Простые квадраты</div>
 			<div class="contentVertical">
 				<div id="scoreResult" class="curved">
 					<p class="font1">Игра закончена, Ваши результаты:</p>
@@ -915,36 +918,36 @@
 					<p id="deletedSquaresCountLable" class="font2"></p>
 				</div>
 				<div id="buttons" class="curved">
-					<button id="restartButton">Попробовать ещё раз</button>
-					<button id="shareButton">Поделиться результатом</button>
+					<button class="mui-btn mui-btn-primary" id="restartButton">Попробовать ещё раз</button>
+					<button class="mui-btn mui-btn-primary" id="shareButton">Поделиться результатом</button>
 				</div>
 			</div>
 			<div id="footer"></div>
 		</div>
 		
 		<div id="welcomeScreen" class="mainContainer">
-			<div id="header">Простые квадраты</div>
+			<div id="header" class="mui-text-subhead mui-text-white">Простые квадраты</div>
 			<div class="contentVertical">
 				<div id="startBlock" class="curved">
-					<p align="center" class="font1">Простые квадраты</p>
+					<p align="center" class="mui-text-display1 mui-text-black">Простые квадраты</p>
 					<p align="center" class="font2">Простая игра о квадратах и квадратами</p>
-					<p align="center"><button id="welcomeStartButton">Играть</button></p>
+					<p align="center"><button class="mui-btn mui-btn-primary mui-btn-raised" id="welcomeStartButton">Играть</button></p>
 				</div>
 			</div>
 			<div id="footer">
-				<button id="showHelpButton">Об игре</button>
-				<button id="inviteFriends">Пригласить друзей</button>
+				<button class="mui-btn mui-btn-primary" id="showHelpButton">Об игре</button>
+				<button class="mui-btn mui-btn-primary" id="inviteFriends">Пригласить друзей</button>
 			</div>
 		</div>
 		
 		<div id="infoScreen" class="mainContainer">
-			<div id="header">Простые квадраты: справка</div>
+			<div id="header" class="mui-text-subhead mui-text-white">Простые квадраты: справка</div>
 			<div class="contentVertical">
 				<div id="helpBlock" class="curved">
 					<p align="center" class="font2">
 					Целью игры является расположение максимального числа фигур из квадратов на игровом поле. При заполнении строки или столбца - квадраты удаляются.
 					</p>
-					<p align="center"><button id="infoScreenBackButton">Ok</button></p>
+					<p align="center"><button class="mui-btn mui-btn-primary mui-btn-raised" id="infoScreenBackButton">Ok</button></p>
 				</div>
 			</div>
 			<div id="footer"></div>

@@ -1,5 +1,5 @@
 body {
-	background: moccasin;
+	background: #E3F2FD;
 	margin: 0;
     font-family: tahoma, arial, verdana, sans-serif, Lucida Sans;
 }
@@ -17,11 +17,13 @@ body {
 }
 
 #header {
-	background:darkturquoise;
+	background: #2196F3;
 	padding-top: 5px;
 	padding-bottom: 5px;
 	padding: 5px;
-	box-shadow: 0px 5px 5px 0px rgba(50,50,50,0.75);
+	box-shadow: 0px 5px 5px 0px rgba(50, 50, 50, 0.75);
+    color: #ffffff;
+    font-family: sans-serif;
 /*	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 */
@@ -47,7 +49,7 @@ body {
 
 
 #footer {
-	background:darkturquoise;
+	background: rgba(39, 144, 176);
 	width: 100%;
 	display: flex;
 	justify-content: space-around;
