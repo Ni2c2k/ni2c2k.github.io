@@ -758,8 +758,9 @@
                         // retrieve data from parse
                         var query = new Parse.Query(Parse.User);
                         query.containedIn( "username", convinientUsers );
+                        query.greaterThan("gamePlayedCount", 0 );
                         query.descending("addedCount");
-                        query.limit(10);
+                        query.limit(5);
                         query.find({
                             success: function(result) {
                                 console.log( result );
