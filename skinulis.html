@@ -47,6 +47,7 @@
                 ng-model="ctrl.newItem.name"
                 placeholder="Имя"
                 class="form-control"
+                focus-on="focusMe"
                 required>
               <input type="text"
                 ng-model="ctrl.newItem.amount"
@@ -99,7 +100,26 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
   <script type="text/javascript">
     angular.module('fundApp', [])
-      .controller( 'MainCtrl', [function(){
+      .directive('focusOn', function(){
+        return function(scope, elem, attr){
+          scope.$on('focusOn', function(e,name){
+            console.log('on focus');
+            if(name === attr.focusOn){
+              elem[0].focus();
+            }
+          });
+        };
+      })
+      .factory('focus', function($rootScope, $timeout){
+        return function(name){
+          $timeout(function(){
+            $rootScope.$broadcast('focusOn', name);
+          });
+        };
+      })
+      .controller( 'MainCtrl', ['focus', function(focus){
+
+        focus('focusMe');
 
         var self = this;
 
@@ -112,6 +132,7 @@
           self.newItem.name = '';
           self.newItem.amount = '';
           self.calculate( self.items );
+          focus('focusMe');
         };
 
         self.totalAmount = function(){
