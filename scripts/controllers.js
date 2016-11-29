@@ -5,7 +5,7 @@ angular.module('skinulisApp')
     self.controlName = 'MainController';
     console.log('MainController has been created');
   }])
-  .controller('ViewController', ['$routeParams', '$timeout', function($routeParams, $timeout) {
+  .controller('ViewController', ['$routeParams', '$timeout', '$location', function($routeParams, $timeout, $location) {
     var self = this;
 
     console.log('ViewController billId = ' + $routeParams.billId);
@@ -35,6 +35,11 @@ angular.module('skinulisApp')
 
     self.meanAmount = function(){
       return 100;
+    };
+
+    self.changeLocationToMain = function(){
+      $location.path('/create');
+      $location.replace();
     };
   }])
   .controller('CreatingController', ['focus', '$timeout', function(focus, $timeout) {
