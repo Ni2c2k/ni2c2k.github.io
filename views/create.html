@@ -1,0 +1,82 @@
+<div class="row">
+  <div class="col-sm-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">Кто скидывался</div>
+      <div class="panel-body">
+
+        <table class="table table-striped table-condensed" ng-show="ctrl.items.length != 0">
+          <thead>
+            <tr>
+              <th>Имя</th>
+              <th>Сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in ctrl.items">
+              <th>{{item.name}}</th>
+              <th>{{item.amount}}</th>
+            </tr>
+            <tr class="info">
+              <th>Итого:</th>
+              <th>{{ctrl.totalAmount()}}</th>
+            </tr>
+          </tbody>
+        </table>
+
+        <form ng-submit="ctrl.submit()" class="form-inline" name="formAddPerson">
+          <input type="text"
+            ng-model="ctrl.newItem.name"
+            placeholder="Имя"
+            class="form-control"
+            focus-on="focusMe"
+            ng-required="required"></input>
+          <input type="text"
+            ng-model="ctrl.newItem.amount"
+            placeholder="Сумма"
+            class="form-control"
+            ng-required="required"></input>
+          <input type="submit"
+            value="Добавить"
+            class="btn btn-primary"
+            ng-disabled="formAddPerson.$invalid"></input>
+        </form>
+
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">Кто кому должен</div>
+      <div class="panel-body">
+        <p ng-show="ctrl.results.length === 0">Никто никому не должен</p>
+        <table class="table table-striped table-condensed" ng-show="ctrl.results.length != 0">
+          <thead>
+            <tr>
+              <th>Кто</th>
+              <th>Кому</th>
+              <th>Сколько</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in ctrl.results">
+              <th>{{item.from}}</th>
+              <th>{{item.to}}</th>
+              <th>{{item.amount}}</th>
+            </tr>
+          </tbody>
+        </table>
+        <span ng-show="ctrl.items.length != 0">Затраты на человека: {{ctrl.meanAmount()}}</span>
+        <div>
+          <button type="button" class="btn btn-default" ng-show="ctrl.isShowGetLinkButton()" ng-click="ctrl.saveAndGetLink()">
+            <span class="glyphicon glyphicon-link"></span>
+            Получить ссылку на результат
+          </button>
+        </div>
+        <div class="input-group" ng-show="ctrl.isHasLinkFunc()">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-link"></i></span>
+          <input id="msg" type="text" class="form-control" name="msg" placeholder="URL will be here" value="{{ctrl.link}}"></input>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

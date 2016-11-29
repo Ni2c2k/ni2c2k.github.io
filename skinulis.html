@@ -1,113 +1,35 @@
-<html ng-app="fundApp">
+<html>
 <head>
-  <title>Fund app</title>
+  <title>Skinulis app</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"></link>
+  <link rel="stylesheet" href="styles/bootstrap.min.css"></link>
+  <link rel="stylesheet" href="styles/customize.css"></link>
 
-  <link rel="stylesheet" href="bootstrap.min.css">
-  <style>
-  .bg-2 {
-    background-color: #ffffff;
-  }
-  .page-header {
-  }
-  .jumbotron {
-    padding-top: 3px;
-    padding-bottom: 3px;
-  }
+  <script src="scorocode.min.js"></script>
+  <script>
+    window.onload = function(){
+      Scorocode.Init({
+        ApplicationID: "32919e27acab1efc67c996e44a858ca9",
+        JavaScriptKey: "d2ec5f0f2c794c25e2228b8e93af9514"
+      });
+    }
+  </script>
 
-  </style>
 </head>
-<body ng-controller="MainCtrl as ctrl">
-
+<body ng-app="skinulisApp">
   <div class="jumbotron text-center">
     <h2>Скинулись</h2>
     <p>Помогает посчитать кто сколько и кому должен вернуть денег</p>
   </div>
 
   <div class="container-fluid">
-
-    <div class="row">
-      <div class="col-sm-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">Кто скидывался</div>
-          <div class="panel-body">
-
-            <table class="table table-striped table-condensed" ng-show="ctrl.items.length != 0">
-              <thead>
-                <tr>
-                  <th>Имя</th>
-                  <th>Сумма</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="item in ctrl.items">
-                  <th>{{item.name}}</th>
-                  <th>{{item.amount}}</th>
-                </tr>
-                <tr class="info">
-                  <th>Итого:</th>
-                  <th>{{ctrl.totalAmount()}}</th>
-                </tr>
-              </tbody>
-            </table>
-
-            <form ng-submit="ctrl.submit()" class="form-inline" name="formAddPerson">
-              <input type="text"
-                ng-model="ctrl.newItem.name"
-                placeholder="Имя"
-                class="form-control"
-                focus-on="focusMe"
-                required>
-              <input type="text"
-                ng-model="ctrl.newItem.amount"
-                placeholder="Сумма"
-                class="form-control"
-                required>
-              <input type="submit"
-                value="Добавить"
-                class="btn btn-primary"
-                ng-disabled="formAddPerson.$invalid">
-            </form>
-
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">Кто кому должен</div>
-          <div class="panel-body">
-            <p ng-show="ctrl.results.length === 0">Никто никому не должен</p>
-            <table class="table table-striped table-condensed" ng-show="ctrl.results.length != 0">
-              <thead>
-                <tr>
-                  <th>Кто</th>
-                  <th>Кому</th>
-                  <th>Сколько</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="item in ctrl.results">
-                  <th>{{item.from}}</th>
-                  <th>{{item.to}}</th>
-                  <th>{{item.amount}}</th>
-                </tr>
-              </tbody>
-            </table>
-            <span ng-show="ctrl.items.length != 0">Затраты на человека: {{ctrl.meanAmount()}}<span>
-            <div>
-              <button type="button" class="btn btn-default" ng-show="ctrl.results.length != 0">
-                <span class="glyphicon glyphicon-link"></span>
-                Получить ссылку на результат
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div ng-view>
     </div>
   </div>
+
   <footer class="container-fluid bg-2">
     <div class="col-sm-6">
       <p>Created by Ni2c2k</p>
@@ -117,121 +39,13 @@
     </div>
   </footer>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-  <script type="text/javascript">
-    angular.module('fundApp', [])
-      .directive('focusOn', function(){
-        return function(scope, elem, attr){
-          scope.$on('focusOn', function(e,name){
-            console.log('on focus');
-            if(name === attr.focusOn){
-              elem[0].focus();
-            }
-          });
-        };
-      })
-      .factory('focus', function($rootScope, $timeout){
-        return function(name){
-          $timeout(function(){
-            $rootScope.$broadcast('focusOn', name);
-          });
-        };
-      })
-      .controller( 'MainCtrl', ['focus', function(focus){
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.9/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.9/angular-route.min.js"></script>
 
-        focus('focusMe');
+  <script src="scripts/app.js"></script>
+  <script src="scripts/directives.js"></script>
+  <script src="scripts/services.js"></script>
+  <script src="scripts/controllers.js"></script>
 
-        var self = this;
-
-        self.items = [];
-
-        self.submit = function(){
-          var item = { name: self.newItem.name, amount: self.newItem.amount };
-          console.log(item);
-          self.items.push( item );
-          self.newItem.name = '';
-          self.newItem.amount = '';
-          self.calculate( self.items );
-          focus('focusMe');
-        };
-
-        self.totalAmount = function(){
-          return self.items.reduce( function( sum, current){
-            return sum + parseInt( current.amount );
-          }, 0);
-        };
-
-        self.meanAmount = function(){
-          if( self.items.length > 0) {
-            var mean = self.totalAmount() / self.items.length;
-            return mean;
-          }
-          return 0.0;
-        };
-
-        self.results =[];
-
-        self.calculate = function( inputItems ){
-          var sinks = [];
-          var sources = [];
-
-          var amountPerPerson = self.meanAmount();
-
-          inputItems.forEach(function(entry){
-            if( entry.amount > amountPerPerson ){
-              sinks.push( {name: entry.name, count: entry.amount - amountPerPerson});
-            } else if( entry.amount < amountPerPerson ){
-              sources.push( {name: entry.name, count: amountPerPerson - entry.amount});
-            }
-          });
-
-          console.log( sinks );
-          console.log( sources );
-
-          self.results = [];
-
-          for( var i = 0; i < sources.length; ++i){
-            for( var j = 0; j < sinks.length; ++j){
-              if( sources[ i ].count === 0){
-                break;
-              }
-              if( sinks[ j ].count === 0 ){
-                continue;
-              }
-              if( sources[ i ].count === sinks[ j ].count ) {
-                self.results.push({from: sources[i].name, to:sinks[j].name, amount: sources[i].count});
-                sinks[j].count = 0;
-                sources[i].count = 0;
-                break;
-              }
-            }
-          }
-
-          for( var i = 0; i < sources.length; ++i){
-            for( var j = 0; j < sinks.length; ++j ){
-              if( sources[ i ].count === 0){
-                break;
-              }
-              if( sinks[ j ].count === 0 ) {
-                continue;
-              }
-              if( sinks[ j ].count <= sources[ i ].count ) {
-                var transfer = sinks[ j ].count;
-                self.results.push({from: sources[i].name, to: sinks[j].name, amount: transfer});
-                sinks[ j ].count = sinks[ j ].count - transfer;
-                sources[i].count = sources[i].count - transfer;
-              } else {
-                var transfer = sources[i].count;
-                self.results.push({from: sources[i].name, to: sinks[j].name, amount: transfer});
-                sinks[ j ].count = sinks[j].count - transfer;
-                sources[i].count = sources[ i].count - transfer;
-              }
-            }
-          }
-
-        };
-
-      }]);
-  </script>
 </body>
 </html>
