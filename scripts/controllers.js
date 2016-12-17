@@ -22,6 +22,7 @@ angular.module('skinulisApp')
           var billData = finded.result[0].billData;
           self.results.perPerson = billData.perPerson;
           self.results.ostatok = billData.ostatok;
+          self.results.items = [];
           for( var i = 0; i < billData.lines.length; ++i){
             self.results.items.push({from: billData.lines[i].from, to: billData.lines[i].to, amount: billData.lines[i].amount});
           }
@@ -113,7 +114,7 @@ angular.module('skinulisApp')
             self.saveAndGetLink = function() {
               var billData = {};
               billData["description"] = "application data";
-              billData["lines"] = self.results.items;
+              billData["lines"] = self.results.items;s
               billData["perPerson"] = self.results.perPerson;
               billData["ostatok"] = self.results.ostatok;
 
