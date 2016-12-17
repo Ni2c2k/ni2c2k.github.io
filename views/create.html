@@ -4,7 +4,7 @@
       <div class="panel-heading">Кто скидывался</div>
       <div class="panel-body">
 
-        <table class="table table-striped table-condensed" ng-show="ctrl.items.length != 0">
+        <table class="table table-striped table-condensed" ng-show="ctrl.itemsAccurate.length != 0">
           <thead>
             <tr>
               <th>Имя</th>
@@ -40,7 +40,8 @@
             ng-model="ctrl.newItem.amount"
             placeholder="Сумма"
             class="form-control"
-            ng-required="required"></input>
+            ng-required="required"
+            ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"></input>
           <input type="submit"
             value="Добавить"
             class="btn btn-primary"
