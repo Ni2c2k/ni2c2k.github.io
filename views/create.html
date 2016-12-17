@@ -8,13 +8,19 @@
           <thead>
             <tr>
               <th>Имя</th>
-              <th>Сумма</th>
+              <th class="text-right">Сумма</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="item in ctrl.items">
               <th>{{item.name}}</th>
-              <th>{{item.amount}}</th>
+              <th class="text-right">{{item.amount}}</th>
+              <th class="text-center">
+                <button type="button" class="btn btn-sm btn-default" ng-click="ctrl.delete($index)">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </button>
+              </th>
             </tr>
             <tr class="info">
               <th>Итого:</th>
@@ -61,7 +67,7 @@
             <tr ng-repeat="item in ctrl.results">
               <th>{{item.from}}</th>
               <th>{{item.to}}</th>
-              <th>{{item.amount}}</th>
+              <th>{{item.amount | currency : ""}}</th>
             </tr>
           </tbody>
         </table>

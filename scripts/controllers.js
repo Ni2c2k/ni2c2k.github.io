@@ -76,6 +76,13 @@ angular.module('skinulisApp')
               focus('focusMe');
             };
 
+            self.delete = function(index){
+              console.log('delete item ', index);
+              self.items.splice( index, 1 );
+              self.calculate( self.items );
+              focus('focusMe');
+            };
+
             self.totalAmount = function(){
               return self.items.reduce( function( sum, current){
                 return sum + parseInt( current.amount );
