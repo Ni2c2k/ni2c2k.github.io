@@ -114,7 +114,7 @@ angular.module('skinulisApp')
             self.saveAndGetLink = function() {
               var billData = {};
               billData["description"] = "application data";
-              billData["lines"] = self.results.items;s
+              billData["lines"] = self.results.items;
               billData["perPerson"] = self.results.perPerson;
               billData["ostatok"] = self.results.ostatok;
 
