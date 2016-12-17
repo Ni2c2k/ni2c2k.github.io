@@ -10,7 +10,7 @@ angular.module('skinulisApp')
 
     console.log('ViewController billId = ' + $routeParams.billId);
 
-    self.results = [];
+    self.results = {};
 
     var query = new Scorocode.Query("bills");
     query.equalTo('_id', $routeParams.billId).find()
@@ -20,8 +20,10 @@ angular.module('skinulisApp')
 
         $timeout(function(){
           var billData = finded.result[0].billData;
+          self.results.perPerson = billData.perPerson;
+          self.results.ostatok = billData.ostatok;
           for( var i = 0; i < billData.lines.length; ++i){
-            self.results.push({from: billData.lines[i].from, to: billData.lines[i].to, amount: billData.lines[i].amount});
+            self.results.items.push({from: billData.lines[i].from, to: billData.lines[i].to, amount: billData.lines[i].amount});
           }
         }, 10);
 
@@ -49,16 +51,17 @@ angular.module('skinulisApp')
             var self = this;
 
             self.items = [];
+            self.itemsAccurate = [];
             self.isHasLink = 0;
             self.link = "";
-            self.results =[];
+            self.results = {perPerson: 0, ostatok: 0, items: []};
 
             self.isHasLinkFunc = function() {
               return self.isHasLink === 1;
             };
 
             self.isShowGetLinkButton = function() {
-              if( self.results.length > 0 ) {
+              if( self.results.items.length > 0 ) {
                 if( self.isHasLink === 0 ) {
                   return true;
                 }
@@ -70,6 +73,10 @@ angular.module('skinulisApp')
               var item = { name: self.newItem.name, amount: self.newItem.amount };
               console.log(item);
               self.items.push( item );
+
+              var accurateItem = { name: self.newItem.name, amount: Math.floor(self.newItem.amount * 100), amountAsInput: self.newItem.amount };
+              self.itemsAccurate.push( accurateItem);
+
               self.newItem.name = '';
               self.newItem.amount = '';
               self.calculate( self.items );
@@ -79,17 +86,18 @@ angular.module('skinulisApp')
             self.delete = function(index){
               console.log('delete item ', index);
               self.items.splice( index, 1 );
+              self.itemsAccurate.splice( index, 1 );
               self.calculate( self.items );
               focus('focusMe');
             };
 
-            self.totalAmount = function(){
+            self.totalAmount = function( ){
               return self.items.reduce( function( sum, current){
                 return sum + parseInt( current.amount );
               }, 0);
             };
 
-            self.meanAmount = function(){
+            self.meanAmount = function( ){
               if( self.items.length > 0) {
                 var mean = self.totalAmount() / self.items.length;
                 return mean;
@@ -105,7 +113,9 @@ angular.module('skinulisApp')
             self.saveAndGetLink = function() {
               var billData = {};
               billData["description"] = "application data";
-              billData["lines"] = self.results;
+              billData["lines"] = self.results.items;
+              billData["perPerson"] = self.results.perPerson;
+              billData["ostatok"] = self.results.ostatok;
 
               var bill = new Scorocode.Object("bills");
               bill.set("name", "Generated from js").set("billData", billData);
@@ -124,13 +134,44 @@ angular.module('skinulisApp')
 
             };
 
+            self.totalAmountAccurate = function( lItems ) {
+              return lItems.reduce( function( sum, current){
+                return sum + parseInt( current.amount );
+              }, 0);
+            };
+
+            self.meanAmountAccurate = function( lItems ) {
+              if( lItems.length > 0 ) {
+                var mean = Math.floor( self.totalAmountAccurate( lItems ) / lItems.length );
+                return mean;
+              }
+              return 0;
+            }
+
             self.calculate = function( inputItems ){
               var sinks = [];
               var sources = [];
 
-              var amountPerPerson = self.meanAmount();
+              /*
+              var localItems = inputItems.map( function(x) {
+                var rObj = {};
+                rObj.name = x.name;
+                rObj.amount = x.amount * 100;
+                return rObj;
+              });
+              */
+              var localItems = self.itemsAccurate;
 
-              inputItems.forEach(function(entry){
+              console.log( localItems);
+              //var amountPerPerson = self.meanAmount( );
+              var amountPerPerson = self.meanAmountAccurate( localItems );
+              var ostatok = self.totalAmountAccurate(localItems) - amountPerPerson * localItems.length;
+
+              console.log('totalAmountAccurate ' + self.totalAmountAccurate(localItems));
+              console.log('per person: ' + amountPerPerson + ' ostatok = ' + ostatok );
+
+              //inputItems.forEach(function(entry){
+              localItems.forEach(function(entry){
                 if( entry.amount > amountPerPerson ){
                   sinks.push( {name: entry.name, count: entry.amount - amountPerPerson});
                 } else if( entry.amount < amountPerPerson ){
@@ -141,7 +182,9 @@ angular.module('skinulisApp')
               console.log( sinks );
               console.log( sources );
 
-              self.results = [];
+              self.results.perPerson = amountPerPerson / 100;
+              self.results.ostatok = ostatok / 100;
+              self.results.items = [];
 
               for( var i = 0; i < sources.length; ++i){
                 for( var j = 0; j < sinks.length; ++j){
@@ -152,7 +195,7 @@ angular.module('skinulisApp')
                     continue;
                   }
                   if( sources[ i ].count === sinks[ j ].count ) {
-                    self.results.push({from: sources[i].name, to:sinks[j].name, amount: sources[i].count});
+                    self.results.items.push({from: sources[i].name, to:sinks[j].name, amount: sources[i].count / 100 });
                     sinks[j].count = 0;
                     sources[i].count = 0;
                     break;
@@ -170,12 +213,12 @@ angular.module('skinulisApp')
                   }
                   if( sinks[ j ].count <= sources[ i ].count ) {
                     var transfer = sinks[ j ].count;
-                    self.results.push({from: sources[i].name, to: sinks[j].name, amount: transfer});
+                    self.results.items.push({from: sources[i].name, to: sinks[j].name, amount: transfer / 100 });
                     sinks[ j ].count = sinks[ j ].count - transfer;
                     sources[i].count = sources[i].count - transfer;
                   } else {
                     var transfer = sources[i].count;
-                    self.results.push({from: sources[i].name, to: sinks[j].name, amount: transfer});
+                    self.results.items.push({from: sources[i].name, to: sinks[j].name, amount: transfer / 100});
                     sinks[ j ].count = sinks[j].count - transfer;
                     sources[i].count = sources[ i].count - transfer;
                   }

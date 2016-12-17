@@ -3,8 +3,8 @@
     <div class="panel panel-default">
       <div class="panel-heading">Кто кому должен</div>
       <div class="panel-body">
-        <p ng-show="viewCtrl.results.length === 0">Никто никому не должен</p>
-        <table class="table table-striped table-condensed" ng-show="viewCtrl.results.length != 0">
+        <p ng-show="viewCtrl.results.items.length === 0">Никто никому не должен</p>
+        <table class="table table-striped table-condensed" ng-show="viewCtrl.results.items.length != 0">
           <thead>
             <tr>
               <th>Кто</th>
@@ -13,13 +13,21 @@
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="item in viewCtrl.results">
+            <tr ng-repeat="item in viewCtrl.results.items">
               <th>{{item.from}}</th>
               <th>{{item.to}}</th>
               <th>{{item.amount}}</th>
             </tr>
           </tbody>
         </table>
+        <div ng-show="viewCtrl.results.items.length != 0">
+          <div>
+            <span>Затраты на человека: {{ctrl.results.perPerson | currency:""}}</span>
+          </div>
+          <div ng-show="viewCtrl.results.ostatok != 0">
+            <span>Неподеленный остаток: {{ctrl.results.ostatok | currency:""}}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
