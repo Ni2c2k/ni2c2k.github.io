@@ -22,10 +22,10 @@
         </table>
         <div ng-show="viewCtrl.results.items.length != 0">
           <div>
-            <span>Затраты на человека: {{ctrl.results.perPerson | currency:""}}</span>
+            <span>Затраты на человека: {{viewCtrl.results.perPerson | currency:""}}</span>
           </div>
           <div ng-show="viewCtrl.results.ostatok != 0">
-            <span>Неподеленный остаток: {{ctrl.results.ostatok | currency:""}}</span>
+            <span>Неподеленный остаток: {{viewCtrl.results.ostatok | currency:""}}</span>
           </div>
         </div>
       </div>
