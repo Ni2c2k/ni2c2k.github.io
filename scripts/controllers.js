@@ -71,6 +71,9 @@ angular.module('skinulisApp')
             };
 
             self.submit = function(){
+
+              self.isHasLink = 0;
+
               var item = { name: self.newItem.name, amount: self.newItem.amount };
               console.log(item);
               self.items.push( item );
@@ -85,6 +88,9 @@ angular.module('skinulisApp')
             };
 
             self.delete = function(index){
+
+              self.isHasLink = 0;
+
               console.log('delete item ', index);
               self.items.splice( index, 1 );
               self.itemsAccurate.splice( index, 1 );
