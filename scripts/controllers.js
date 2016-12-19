@@ -132,7 +132,7 @@ angular.module('skinulisApp')
                   console.log('saved id = ' + saved._id);
 
                   $timeout(function() {
-                    self.setLink( "https://ni2c2k.github.io/skinulis.html#/view/" + saved._id );
+                    self.setLink( "http://skinuliscalc.ru/#/view/" + saved._id );
                   }, 10);
                 })
                 .catch((error) => {
