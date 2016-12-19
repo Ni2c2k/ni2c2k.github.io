@@ -1,417 +1,53 @@
-<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <title>Test github.io</title>
-        <script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
-        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-        <script type="text/javascript">
-		var game = {};
-		
-		var stage;
-		
-		
-		function getRandomInt( min, max ) {
-			return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
-		};
-		
-		( function( g, sizex, sizey ) {
-			
-			var sizex = sizex;
-			var sizey = sizey;
+<head>
+  <title>Skinulis app</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"></link>
+  <link rel="stylesheet" href="styles/bootstrap.min.css"></link>
+  <link rel="stylesheet" href="styles/customize.css"></link>
 
-			var cells = {};
-			
-			g.init = function() {
-				for( var y = 0; y < sizey; ++y ) {
-					cells[y] = new Array(sizex);
-					for( var x = 0; x < sizex; ++x ) {
-						cells[y][x] = null;
-					}
-				}
-				//console.log( cells );
-			};
-			
-			g.isOneMoreFigureCanBePlaced = function( figure ) {
-				var squarePosition = figure.getFirstSquarePosition();
-				for( var x = 0; x < sizey; ++x ) {
-					for( var y = 0; y < sizey; ++y ) {
-						if( g.isCanAddFigure( figure, squarePosition.x, squarePosition.y, x, y ) == true ) {
-							return true;
-						}
-					}
-				}
-				return false;
-			};
-			
-			g.isCanAddFigure = function( figure, figurex, figurey, xpos, ypos ) {
-				// check right
-				var falseRight = 0;
-				var falseLeft = 0;
-				var falseBottom = 0;
-				var falseTop = 0;
-				var isCollision = 0;
-				for( var y = 0; y < 3; ++y){
-					for( var x = 0; x < 3; ++x ) {
-						if( figure.squares[y * 3 + x] != null ) {
-							if( xpos + x - figurex >= sizex ) {
-								falseRight = 1;
-								break;
-							}
-							if( xpos + x - figurex < 0 ) {
-								falseLeft = 1;
-								break;
-							}
-							if( ypos + y - figurey >= sizey ) {
-								falseBottom = 1;
-								break;
-							}
-							if( ypos + y - figurey < 0 ) {
-								falseTop = 1;
-								break;
-							}
-							if( cells[ypos + y - figurey][xpos + x - figurex] != null ) {
-								isCollision = 1;
-								break;
-							}
-						}
-					}
-				}
-				if( falseBottom == 0 && falseTop == 0 && falseRight == 0 && falseLeft == 0 && isCollision == 0) {
-					return true;
-				} else {
-					//console.log( "false: bottom, top, right, left, collision " + falseBottom + " " + falseTop + " " + falseRight + " " + falseLeft + " " + isCollision );
-					return false;
-				}
-			};
-			
-			g.addFigure = function( figure, figurex, figurey, xpos, ypos ) {
-				var squareCounts = 0;
-				var result = false;
-				//if( g.isCanAddFigure( figure, figurex, figurey, xpos, ypos ) == true ) {
-					for( var y = 0; y < 3; ++y ) {
-						for( var x = 0; x < 3; ++x ) {
-							if( figure.squares[y * 3 + x] != null ) {
-								cells[ypos + y - figurey][xpos + x - figurex] = figure.squares[y*3+x];
-								cells[ypos + y - figurey][xpos + x - figurex].shape.x = (xpos + x - figurex) * 30 + 15 + 15;
-								cells[ypos + y - figurey][xpos + x - figurex].shape.y = (ypos + y - figurey) * 30 + 15;
-								cells[ypos + y - figurey][xpos + x - figurex].disableEvents();
-								cells[ypos + y - figurey][xpos + x - figurex].figure = null;
-								squareCounts += 1;
-							}
-						}
-					}
-					result = true;
-				//}
-				return { 'result': result, 'addedCount': squareCounts };
-			};
-			
-			g.checkLines = function( ) {
-				var lines = {};
-				var columns = {};
-				for( var y = 0; y < sizey; ++y ) {
-					var full = 1;
-					for( var x = 0; x < sizex; ++x ) {
-						if( cells[y][x] == null ) {
-							full = 0;
-							break;
-						}
-					}
-					lines[y] = full;
-				}
-				
-				for( var x = 0; x < sizex; ++x ) {
-					var full = 1;
-					for( var y = 0; y < sizey; ++y ) {
-						if( cells[y][x] == null ) {
-							full = 0;
-							break;
-						}
-					}
-					columns[x] = full;
-				}
-				return { 'lines' : lines, 'columns' : columns };
- 			};
- 			
- 			g.deleteFullLinesAndColumns = function( lc ) {
-				var deletedSquares = [];
-				for( var y = 0; y < sizey; ++y ) {
-					if( lc['lines'][y] != 0 ) {
-						for( var x = 0; x < sizex; ++x ) {
-							if( cells[y][x] != null ) {
-								deletedSquares[ deletedSquares.length ] = cells[y][x];
-								cells[y][x] = null;
-							}
-						}
-					}
-				}
-				for( var x = 0; x < sizex; ++x ) {
-					if( lc['columns'][x] != 0 ) {
-						for( var y = 0; y < sizey; ++y ) {
-							if( cells[y][x] != null ) {
-								deletedSquares[ deletedSquares.length ] = cells[y][x];
-								cells[y][x] = null;
-							}
-						}
-					}
-				}
-				return deletedSquares;
- 			};
- 			
- 			g.getCellByCrd = function ( x, y ) {
-				if( x < 15 ) {
-					return { 'x': -1, 'y': -1 };
-				}
-				var xp = Math.floor((x - 15) / 30);
-				var yp = Math.floor(y / 30);
-				return { 'x': xp, 'y': yp };
- 			};
-			
-		})( game, 10, 10);
-		
-		var controller = {};
-		
-		( function( c, newCount ) {
-			var placeForNewFigures = {
-				'x': 15,
-				'y': 330
-			};
-			var newFigures = [];
-			
-			c.addNewFigure = function( figure ) {
-				figure.setPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
-				figure.setInitialPosition( placeForNewFigures.x + newFigures.length * 90 + 30 * newFigures.length, placeForNewFigures.y);
-				newFigures[ newFigures.length ] = figure;
-			};
-			
-			c.pressmove = function( evt, data ) {
-				if( data.square.figure != null ) {
-					data.square.figure.addDeltaToPosition( evt.stageX - data.square.shape.x, evt.stageY - data.square.shape.y );
-				}
-			};
-			
-			c.pressup = function( evt, data ) {
-				if( data.square.figure != null ) {
-					var figure = data.square.figure;
-					
-					var squarePosition = figure.getTouchedSquarePosition( evt );
-					
-					var cellTouched = game.getCellByCrd( evt.stageX, evt.stageY );
-					if( cellTouched.x > -1 && cellTouched.y > -1 ) {
-						if( game.isCanAddFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y ) == true ) {
-							game.addFigure( figure, squarePosition.x, squarePosition.y, cellTouched.x, cellTouched.y );
-							
-							var deletedSquares = game.deleteFullLinesAndColumns( game.checkLines() );
-							//console.log( deletedSquares.length );
-							
-							if( deletedSquares.length > 0 ) {
-								for( var i = 0; i < deletedSquares.length; ++i ) {
-									scoreHandler.add( deletedSquares[i].getScore() );
-									stage.removeChild( deletedSquares[i].shape );
-								}
-							}
-							
-							console.log( scoreHandler.getScore() );
-							
-							newFigures.splice( newFigures.indexOf( figure ), 1 );
-							c.checkAndUpdateNewFigures();
-							
-							var isEnd = true;
-							for( var i = 0; i < newFigures.length; ++i ) {
-								if( game.isOneMoreFigureCanBePlaced( newFigures[ i ] ) == true ) {
-									isEnd = false;
-									break;
-								}
-							}
-							if( isEnd == true ) {
-								$("#scoreLabel").text("The End. Your score: " + scoreHandler.getScore() );
-							}
-							
-						} else {
-							figure.backToInitialPosition();
-						}
-					} else {
-						figure.backToInitialPosition();
-					}
-				}
-			};
-			
-			c.checkAndUpdateNewFigures = function() {
-				if( newFigures.length != 0 ) {
-					return;
-				}
-				
-				// add New figures
-				for( var i = 0; i < 3; ++i ) {
-					c.addNewFigure( FigureFactory.create() );
-				}
-			};
-			
-		})( controller, 3 );
-		
-		var Square = function( color, figure ) {
-			this.color = color;
-			this.x = 0;
-			this.y = 0;
-			this.shape = new createjs.Shape();
-			//this.shape.graphics.beginFill(this.color).drawCircle(0,0,15);
-			this.shape.graphics.beginFill(this.color).drawRect(-15,-15,30,30).beginStroke('black').drawRect(-15,-15,30,30);
-			this.shape.x = this.x;
-			this.shape.y = this.y;
-			this.figure = figure;
-			this.score = 1;
-			stage.addChild( this.shape );
-			
-			this.shape.on( 'pressmove', controller.pressmove, controller, false, {square: this } );
-			this.shape.on( 'pressup', controller.pressup, controller, false, {square: this } );
-            this.shape.on( 'touchmove', controller.pressmove, controller, false, {square: this } );
+  <script src="scorocode.min.js"></script>
+  <script>
+    window.onload = function(){
+      Scorocode.Init({
+        ApplicationID: "32919e27acab1efc67c996e44a858ca9",
+        JavaScriptKey: "d2ec5f0f2c794c25e2228b8e93af9514"
+      });
+    }
+  </script>
 
-			this.disableEvents = function() {
-				this.shape.off( 'pressmove', controller.pressmove );
-				this.shape.off( 'pressup', controller.pressup );
-                this.shape.off( 'touchmove', controller.pressmove );
-			}
-			
-			this.getScore = function() {
-				return this.score;
-			}
-		};
-		
-		var Figure = function( color, pointArray, stage) {
-			this.squares = new Array(9);
-			this.x = 0;
-			this.y = 0;
-			this.initialX = 0;
-			this.initialY = 0;
-			for( var i = 0; i < pointArray.length; ++i ) {
-				if( pointArray[i] ) {
-					this.squares[i] = new Square( color, this);
-				} else {
-					this.squares[i] = null;
-				}
-			}
-			
-			this.addDeltaToPosition = function( dx, dy ) {
-				this.setPosition( this.x + dx, this.y + dy );
-			}
-			
-			this.setPosition = function( x, y ) {
-				this.x = x;
-				this.y = y;
-				for( var yi = 0; yi < 3; ++yi ) {
-					for( var xi = 0; xi < 3; ++xi ) {
-						if( this.squares[yi * 3 + xi] != null) { 
-							this.squares[yi * 3 + xi].shape.x = this.x + 30 * xi;
-							this.squares[yi * 3 + xi].shape.y = this.y + 30 * yi;
-						}
-					}
-				}
-			}
-			
-			this.setInitialPosition = function( x, y ) {
-				this.initialX = x;
-				this.initialY = y;
-			}
-			
-			this.backToInitialPosition = function() {
-				this.setPosition( this.initialX, this.initialY );
-			}
-			
-			this.getTouchedSquarePosition = function( evt ) {
-				var xp = 0, yp = 0;
-				for( var y = 0; y < 3; ++y ) {
-					for( var x = 0; x < 3; ++x ) {
-						if( this.squares[y * 3 + x] != null ) {
-							var sq = this.squares[ y * 3 + x ];
-							if( sq.shape.x <= evt.stageX && sq.shape.x + 30 > evt.stageX ) {
-								xp = x;
-							}
-							if( sq.shape.y <= evt.stageY && sq.shape.y + 30 > evt.stageY ) {
-								yp = y;
-							}
-						}
-					}
-				}
-				return { 'x' : xp, 'y' : yp };
-			}
-			
-			this.getFirstSquarePosition = function() {
-				for( var y = 0; y < 3; ++y ) {
-					for( var x = 0; x < 3; ++x ) {
-						if( this.squares[y * 3 + x] != null ) {
-							return { 'x' : x, 'y' : y };
-						}
-					}
-				}
-				return { 'x':0, 'y':0 };
-			}
-		};
-		
-		var board;
-		var circle;
-		var fig1, fig2;
-		
-		var scoreHandler = {};
-		( function( s ) {
-			var score = 0;
-			s.reset = function() {
-				score = 0;
-			};
-			s.add = function( count ) {
-				score = score + count;
-				$("#scoreLabel").text("Score: " + score );
-			};
-			s.getScore = function( ) {
-				return score;
-			};
-		})( scoreHandler );
-		
-		var FigureFactory = {};
-		
-		( function( f ) {
-		
-			var colors = ['red', 'blue', 'green', 'gray', 'brown' ];
-			var forms = [ [0,1,0,0,1,0,0,1,0], [0,0,0,1,1,1,0,0,0], [1,1,1,1,1,1,1,1,1], 
-							[0,0,0,0,1,0,1,1,1], [0,0,1,0,1,1,0,0,1], [1,0,0,1,1,0,1,0,0],
-							[1,1,1,0,1,0,0,0,0], [0,0,0,0,1,0,0,0,0],
-							[0,0,1,0,0,1,0,1,1], [1,0,0,1,0,0,1,1,0]];
-		
-			f.create = function() {
-				var fig = new Figure( colors[ getRandomInt( 0, colors.length - 1 )], forms[ getRandomInt( 0, forms.length - 1 ) ] );
-				return fig;
-			};
-		})( FigureFactory );
-		
-            function init(){
-				stage = new createjs.Stage("gameCanvas");
-                createjs.Touch.enable(stage);
-				board = new createjs.Shape();
-				board.graphics.beginStroke("black");
-				var dx = 30;
-				for( var i = 0; i < 11; ++i ) {
-					board.graphics.moveTo(0 + 15, i * dx).lineTo(dx * 10 + 15, i * dx);
-					board.graphics.moveTo(dx * i + 15, 0).lineTo(dx * i + 15, dx * 10);
-				}
-				board.graphics.endStroke();
-				stage.addChild(board);
-				
-				game.init();
-				scoreHandler.reset();
-				controller.checkAndUpdateNewFigures();
-				
-				createjs.Ticker.on( "tick", tick );
-				createjs.Ticker.setFPS( 30 );
-			}
-			
-			function tick( event ) {
-				stage.update();
-			}
-			
-        </script>
-    </head>
-    <body onload="init();">
-        <p>Just a simple test page</p>
-        <canvas id="gameCanvas" width="500" height="420"></canvas>
-        <p id="scoreLabel">Score: 0</p>
-    </body>
+</head>
+<body ng-app="skinulisApp">
+  <div class="jumbotron text-center">
+    <h2>Скинулись</h2>
+    <p>Помогает посчитать кто сколько и кому должен вернуть денег</p>
+  </div>
+
+  <div class="container-fluid">
+    <div ng-view>
+    </div>
+  </div>
+
+  <footer class="container-fluid bg-2">
+    <div class="row">
+      <div class="col-sm-6">
+        <p>Created by Ni2c2k</p>
+      </div>
+      <div class="col-sm-6 text-right">
+        <p><a href="https://vk.com/ni2c2k">VK</a> <a href="https://github.com/Ni2c2k">Github</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.9/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.9/angular-route.min.js"></script>
+
+  <script src="scripts/app.js"></script>
+  <script src="scripts/directives.js"></script>
+  <script src="scripts/services.js"></script>
+  <script src="scripts/controllers.js"></script>
+
+</body>
 </html>
