@@ -18,6 +18,6 @@ h2 {
   color: #ffffff;
 }
 
-.panel-default {
+.panel-default > .panel-heading {
   background-color: #b39ddb;
 }
