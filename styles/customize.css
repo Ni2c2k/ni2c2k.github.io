@@ -18,7 +18,6 @@ h2 {
   color: #ffffff;
 }
 
-.panel-heading {
+.panel-default {
   background-color: #b39ddb;
-  opacity: 0.54;
 }

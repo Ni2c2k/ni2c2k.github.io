@@ -8,7 +8,7 @@
       "density": 4.0
     }
   ],
-  "theme_color": "#F5F5F5;",
+  "theme_color": "#673AB7",
   "background_color": "#FFFFFF",
   "start_url": "index.html",
   "display": "standalone"
