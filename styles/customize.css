@@ -6,4 +6,15 @@
 .jumbotron {
   padding-top: 3px;
   padding-bottom: 3px;
+  background-color: #673ab7
+}
+
+.jumbotron p {
+  color: #ffffff;
+  opacity: 0.7;
+}
+
+.panel-heading {
+  background-color: #b39ddb;
+  opacity: 0.54;
 }
