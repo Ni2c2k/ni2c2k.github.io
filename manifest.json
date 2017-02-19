@@ -1,7 +1,7 @@
 {
   "name": "Skinulis Calculator",
-  "theme_color": "#9E9E9E",
-  "background_color": "#9E9E9E",
+  "theme_color": "#F5F5F5;",
+  "background_color": "#FFFFFF",
   "start_url": "index.html",
   "display": "standalone"
 }
