@@ -1,5 +1,13 @@
 {
   "name": "Skinulis Calculator",
+  "icons": [
+    {
+      "src": "pict/launcher-icon-4x.png",
+      "sizes" : "192x192",
+      "type": "image/png",
+      "density": 4.0
+    }
+  ],
   "theme_color": "#F5F5F5;",
   "background_color": "#FFFFFF",
   "start_url": "index.html",
