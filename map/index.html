@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Быстрый старт. Размещение интерактивной карты на странице</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="rhill-voronoi-core.js" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+        ymaps.ready(init);
+        var myMap,
+            myPlacemark,
+            mySearchResults,
+            mySearchControl;
+
+        function init(){
+          ymaps.geocode('Челябинск').then(function (res){
+            myMap = new ymaps.Map("map", {
+                center: res.geoObjects.get(0).geometry.getCoordinates(),
+                zoom: 10,
+                controls: ['zoomControl', 'fullscreenControl']
+              }
+            );
+
+            setup();
+          });
+        }
+
+        function setup()
+        {
+          // console.log('bound:');
+          // console.log(myMap.getBounds());
+
+          mySearchControl = new ymaps.control.SearchControl({
+            options: {
+              provider: 'yandex#search',
+              useMapBounds: true,
+              noPopup: true,
+              results: 30
+            }
+          });
+
+          myMap.controls.add(mySearchControl);
+
+          mySearchResults = new ymaps.GeoObjectCollection(null, {
+            hintContentLayout: ymaps.templateLayoutFactory.createClass('$[properties.name]')
+          });
+
+          myMap.geoObjects.add(mySearchResults);
+
+          mySearchControl.events.add('resultselect', function(e) {
+            // var index = e.get('index');
+            // console.log('resultselect');
+          }).add('resultshow', function(e){
+            // console.log('resultshow');
+          }).add('load', function(e){
+            // console.log('load ' + e.get('count'));
+            console.log('results: ' + mySearchControl.getResultsArray().length);
+            // console.log(mySearchControl.getResultsArray());
+
+            mySearchResults.removeAll();
+
+            var sites = [];
+
+            for(var i = 0; i < mySearchControl.getResultsArray().length; ++i){
+              sites.push({
+                x: mySearchControl.getResultsArray()[i].geometry.getCoordinates()[0],
+                y: mySearchControl.getResultsArray()[i].geometry.getCoordinates()[1]
+              });
+            }
+
+            console.log('get bbox');
+
+            var bbox = {
+              xl: myMap.getBounds()[0][0],
+              xr: myMap.getBounds()[1][0],
+              yt: myMap.getBounds()[0][1],
+              yb: myMap.getBounds()[1][1]
+            };
+
+            var diagram = null;
+            // console.log('start computing');
+            var voronoi = new Voronoi();
+            diagram = voronoi.compute(sites, bbox);
+
+            if(!diagram){
+              console.log('no diagram');
+            } else {
+              console.log('computed');
+              var edges = diagram.edges;
+              var iEdge = edges.length;
+              var edge, v;
+              while(iEdge--){
+                edge = edges[iEdge];
+
+                var polyline = new ymaps.Polyline([
+
+                ], {
+
+                },{
+                  strokeWidth: 3,
+                  strokeOpacity: 0.5
+                });
+
+                polyline.geometry.getCoordinates().push([edge.va.x, edge.va.y]);
+                polyline.geometry.getCoordinates().push([edge.vb.x, edge.vb.y]);
+
+                mySearchResults.add(polyline);
+              }
+            }
+
+            console.log('geometry:');
+
+          }).add('submit', function(){
+            // console.log('submit');
+          });
+
+        }
+    </script>
+</head>
+
+<body>
+    <div id="map" style="width: 800px; height: 500px"></div>
+</body>
+
+</html>
