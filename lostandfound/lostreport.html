@@ -7,7 +7,7 @@
 </head>
 <body>
         <nav class="navbar sticky-top navbar-expand-sm navbar-dark bg-dark">
-          <a class="navbar-brand" href="#">Lost&Found</a>
+          <a class="navbar-brand" href="index0.html">Lost&Found</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -18,20 +18,36 @@
             </div>
           </div>
         </nav>
-
-        <section class="jumbotron text-center">
-            <div class="container">
-                <h1 class="jumbotron-heading">Lost and Found</h1>
-                <p class="lead text-muted">This site will help you find your lost pet. Or if you found a pet you can help people</p>
-                <p class="lead">
-                    <a href="lostreport.html" class="btn btn-primary">I've lost my pet</a>
-                    <a href="index.html" class="btn btn-primary">I've found a pet</a>
-                </p>
-            </container>
-        </section>
-
-        <footer class="footer sticky-bottom">
+    <div class="container" style="padding: 1rem;">
+        <div class="row justify-content-center">
+            <div class="col-sm-6">
+                <h3>
+                    Let's try to find your pet in our database of found pet reports firts.
+                </h3>
+                <form>
+                    <div class="form-group">
+                        <label for="typeofpetselect">Type of pet</label>
+                        <select class="form-control form-control-sm" id="typeofpetselect">
+                            <option>Dog</option>
+                            <option>Cat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="locationInput">Location</label>
+                        <input type="text" class="form-control" id="locationInput" placeholder="location"></input>
+                    </div>
+                    <a class="btn btn-primary btn-block" href="index.html">Submit</a>
+                    <!--
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    -->
+                </form>
+            </div>
+        </div>
+        <footer class="footer">
             <div class="container text-center">
+                <p class="float-right">
+                    <a href="#">To top</a>
+                </p>
                 <p>2017</p>
             </div>
         </footer>
