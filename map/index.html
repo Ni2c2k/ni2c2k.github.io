@@ -4,7 +4,7 @@
     <title>Voronoi map</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="rhill-voronoi-core.js" type="text/javascript"></script>
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=14937f17-ed7c-462f-ae8b-1c4f2e652e91&lang=ru_RU" type="text/javascript">
     </script>
     <script type="text/javascript">
         ymaps.ready(init);
@@ -62,16 +62,12 @@
 
             mySearchResults.removeAll();
 
-            var sites = [];
-
-            for(var i = 0; i < mySearchControl.getResultsArray().length; ++i){
-              sites.push({
-                x: mySearchControl.getResultsArray()[i].geometry.getCoordinates()[0],
-                y: mySearchControl.getResultsArray()[i].geometry.getCoordinates()[1]
-              });
-            }
-
-            console.log('get bbox');
+            var sites = mySearchControl.getResultsArray().map(function(point) {
+              return {
+                x: point.geometry.getCoordinates()[0],
+                y: point.geometry.getCoordinates()[1]
+                };
+            });
 
             var bbox = {
               xl: myMap.getBounds()[0][0],
@@ -90,25 +86,21 @@
             } else {
               console.log('computed');
               var edges = diagram.edges;
-              var iEdge = edges.length;
-              var edge, v;
-              while(iEdge--){
-                edge = edges[iEdge];
-
-                var polyline = new ymaps.Polyline([
-
-                ], {
-
-                },{
-                  strokeWidth: 3,
-                  strokeOpacity: 0.5
-                });
+              edges.forEach(function(edge, i, arr) {
+                var polyline = new ymaps.Polyline(
+                  [],
+                  {},
+                  {
+                    strokeWidth: 3,
+                    strokeOpacity: 0.5
+                  }
+                );
 
                 polyline.geometry.getCoordinates().push([edge.va.x, edge.va.y]);
                 polyline.geometry.getCoordinates().push([edge.vb.x, edge.vb.y]);
 
                 mySearchResults.add(polyline);
-              }
+              });
             }
 
             console.log('geometry:');
