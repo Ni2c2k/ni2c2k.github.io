@@ -1,0 +1,399 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Class hours</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            .column {
+                float: left;
+                width: 25%;
+                padding: 1px;
+            }
+            .row:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+            @media screen and (max-width: 600px) {
+                .column {
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <form id="input_form">
+            <label for="start">Начало учебного года</label>
+            <input type="date" id="start" name="academic_year_start" required>
+            <label for="end">Конец учебного года</label>
+            <input type="date" id="end" name="academic_year_end" required> 
+            <br/>
+            <label>Количество часов в понедельник</label>
+            <input type="number" id="mon" min="0" value="0">
+            <br/>
+            <label>Количество часов во вторник</label>
+            <input type="number" id="tue" min="0" value="0" required>
+            <br/>
+            <label>Количество часов в среду</label>
+            <input type="number" id="wed" min="0" value="0">
+            <br/>
+            <label>Количество часов в четверг</label>
+            <input type="number" id="thu" min="0" value="0">
+            <br/>
+            <label>Количество часов в пятницу</label>
+            <input type="number" id="fri" min="0" value="0">
+            <br/>
+            <label>Количество часов в субботу</label>
+            <input type="number" id="sat" min="0" value="0">
+            <br/>
+            <label>Каникулы 1</label>
+            <input type="date" id="holiday_start_1">
+            <input type="date" id="holiday_end_1"> 
+            <br/>
+            <label>Каникулы 2</label>
+            <input type="date" id="holiday_start_2">
+            <input type="date" id="holiday_end_2"> 
+            <br/>
+            <label>Каникулы 3</label>
+            <input type="date" id="holiday_start_3">
+            <input type="date" id="holiday_end_3"> 
+            <br/>
+            <label>Нерабочие и праздничные дни (ДД.ММ.ГГГГ через запятую):</label>
+            <br/>
+            <textarea id="daysoff" name="daysoff" cols="80" placeholder="ДД.ММ.ГГГГ, ДД.ММ.ГГГГ"></textarea>
+            <br/>
+            <input type="button" name="submit" value="Посчитать" onclick = "do_calculate()">
+            <span class="validiry"></span>
+        </form>
+        <p id="total_hours">Всего часов: </p>
+        <div class="row">
+            <div class="column">
+              <p>Четверть 1</p>
+              <p id="hours_part_1"></p>
+              <div id="output_part_1">
+
+              </div>
+            </div>
+            <div class="column">
+              <p>Четверть 2</p>
+              <p id="hours_part_2"></p>
+              <div id="output_part_2">
+
+              </div>
+            </div>
+            <div class="column">
+              <p>Четверть 3</p>
+              <p id="hours_part_3"></p>
+              <div id="output_part_3">
+                  
+              </div>
+            </div>
+             <div class="column">
+              <p>Четверть 4</p>
+              <p id="hours_part_4"></p>
+              <div id="output_part_4">
+                  
+              </div>
+            </div>
+          </div>
+        <div id="div_output">
+
+        </div>
+
+        <script>
+            function daysInFebruary(year) {
+                if(year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
+                    // Leap year
+                    return 29;
+                } else {
+                    // Not a leap year
+                    return 28;
+                }
+            }
+
+            function daysInMonth(year) {
+                let feb = daysInFebruary(year);
+                const days = [
+                    31,
+                    feb,
+                    31,
+                    30, // april
+                    31, // may
+                    30, // june
+                    31, // july
+                    31, // august
+                    30, // semp
+                    31, // oct
+                    30, // nov
+                    31, // dec
+                ];
+                return days;
+            }
+
+            const div_el = document.querySelector('#div_output');
+            const output_div = [
+                document.querySelector("#output_part_1"),
+                document.querySelector("#output_part_2"),
+                document.querySelector("#output_part_3"),
+                document.querySelector("#output_part_4")
+            ];
+            const output_hours = [
+                document.querySelector("#hours_part_1"),
+                document.querySelector("#hours_part_2"),
+                document.querySelector("#hours_part_3"),
+                document.querySelector("#hours_part_4")
+            ];
+            const el_total_hours = document.querySelector("#total_hours");
+
+            function splitRangeByYear(date1, date2)
+            {
+                let ranges = [];
+                if (date1.getFullYear() === date2.getFullYear()) {
+                    ranges.push({'start': date1, 'end': date2});
+                } else {
+                    ranges.push({'start': date1, 'end': new Date(date1.getFullYear(), 11, 31)});
+                    ranges.push({'start': new Date(date2.getFullYear(), 0, 1), 'end': date2});
+                }
+                return ranges;
+            }
+
+            let date1 = new Date(2019, 8, 2);
+            let date2 = new Date(2020, 4, 29);
+
+            function getAllDays(date1, date2) {
+                let days = [];
+                let one_year_ranges = splitRangeByYear(date1, date2);
+                for (let i = 0; i < one_year_ranges.length; ++i) {
+                    let start = one_year_ranges[i].start;
+                    let end = one_year_ranges[i].end;
+                    const days_in_month = daysInMonth(start.getFullYear());
+                    for (let m = start.getMonth(); m <= end.getMonth(); m++)
+                    {
+                        const start_day = (m == start.getMonth() ? start.getDate() : 1);
+                        const end_day = (m == end.getMonth() ? end.getDate() : days_in_month[m]);
+                        for (let d = start_day; d <= end_day; d++)
+                        {
+                            days.push(new Date(start.getFullYear(), m, d));
+                        }
+                    }
+                }
+                return days;
+            }
+
+            function isNotAHoliday(day) {
+                // context is an array of {'start': date, 'end': date}
+                for (let i = 0; i < this.length; i++) {
+                    if (this[i].start <= day && this[i].end >= day) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // let holidays = [
+            //     { 'start': new Date(2019, 9, 14), 'end': new Date(2019, 9, 27) },
+            //     { 'start': new Date(2020, 2, 30), 'end': new Date(2020, 3, 5) }
+            // ];
+
+            // let days_off = [
+            //     new Date(2020, 3, 16)
+            // ];
+
+            function isNotADayOff(day) {
+                // context is a array of dates
+                for (let i = 0; i < this.length; ++i) {
+                    if (this[i].getTime() == day.getTime()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // let working_days = getAllDays(date1, date2)
+            //     .filter(isNotAHoliday, holidays)
+            //     .filter(isNotADayOff, days_off);
+            // console.log(working_days);
+
+            function daysWithClasses(days, classes) {
+                let days_with_classes = [];
+                // console.log(days);
+                for (let i = 0; i < days.length; i++) {
+                    const days_of_the_week = days[i].getDay();
+                    if (classes[days_of_the_week] != null && classes[days_of_the_week] != NaN && classes[days_of_the_week] > 0) {
+                        days_with_classes.push(
+                            {'date': days[i], 'hours': classes[days_of_the_week] }
+                        );
+                    }
+                }
+                return days_with_classes;
+            }
+
+            // let class_hours = {};
+            // class_hours[2] = 2;
+            // class_hours[4] = 1;
+
+            // let days_with_classes = daysWithClasses(working_days, class_hours);
+            // console.log(days_with_classes);
+    
+            // days_with_classes.forEach(function(item, i, days_with_classes) {
+            //     console.log(item);
+
+            //     let p = document.createElement("p");
+            //     let node = document.createTextNode((item.date.getDate()) + '.' + (item.date.getMonth() + 1) + '.' + item.date.getFullYear() + ' ' + item.hours + ' hours');
+            //     p.appendChild(node);
+            //     div_el.appendChild(p);
+            // });
+
+            function splitDaysWithClassesByParts(days_with_classes, holidays) {
+                let days_with_classes_parts = [[], [], [], []];
+                for (let i = 0; i < days_with_classes.length; i++) {
+                    let d = days_with_classes[i].date;
+                    let part = holidays.length;
+                    for (let j = 0; j < holidays.length; j++) {
+                        if (d < holidays[j].start) {
+                            part = j;
+                            break;
+                        }
+                    }
+                    days_with_classes_parts[part].push(days_with_classes[i]);
+                }
+
+                return days_with_classes_parts;
+            }
+
+            function formatDate(date) {
+                const dd = date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate();
+                const mm = ((date.getMonth() + 1) < 10) ? ('0' + (date.getMonth() + 1)) : (date.getMonth() + 1);
+                return '' + dd + '.' + mm + '.' + date.getFullYear();
+            }
+
+            function getInputDaysoff(str) {
+                const str_dates = str.replace(/\s/g, '').split(',');
+                let dates = [];
+                for (let i = 0; i < str_dates.length; i++) {
+                    if (str_dates[i].length === 0) continue;
+                    const date_parts = str_dates[i].split('.');
+                    if (date_parts.length != 3) {
+                        return null;
+                    }
+                    const month = date_parts[1] - 1;
+                    if (month < 0 || month > 11) {
+                        return null;
+                    }
+                    const days_in_month = daysInMonth(date_parts[2]);
+                    const day = date_parts[0];
+                    if (day < 1 || day > days_in_month[month]) {
+                        return null;
+                    }
+                    dates.push(new Date(date_parts[2], date_parts[1] - 1, date_parts[0]));
+                }
+                console.log(dates);
+                return dates;
+            }
+
+            function do_calculate()
+            {
+                // console.log("calculate");
+                let x = document.getElementById("input_form");
+                let year_start_date = x.elements.academic_year_start.valueAsDate;
+                let year_end_date = x.elements.academic_year_end.valueAsDate;
+
+                if (year_start_date == null || year_end_date == null) {
+                    alert('start or end date is null');
+                    return;
+                }
+
+                if (year_start_date >= year_end_date) {
+                    alert('начальная дата позже чем конечная');
+                    return;
+                }
+
+                console.log(year_start_date, year_end_date);
+                let hours = [
+                    0,
+                    x.elements.mon.valueAsNumber,
+                    x.elements.tue.valueAsNumber,
+                    x.elements.wed.valueAsNumber,
+                    x.elements.thu.valueAsNumber,
+                    x.elements.fri.valueAsNumber,
+                    x.elements.sat.valueAsNumber
+                ];
+                console.log(hours);
+
+                let input_holidays = [
+                    [
+                        x.elements.holiday_start_1.valueAsDate,
+                        x.elements.holiday_end_1.valueAsDate
+                    ],
+                    [
+                        x.elements.holiday_start_2.valueAsDate,
+                        x.elements.holiday_end_2.valueAsDate
+                    ],
+                    [
+                        x.elements.holiday_start_3.valueAsDate,
+                        x.elements.holiday_end_3.valueAsDate
+                    ]
+                ]
+
+                let holidays = [];
+                for (let i = 0; i < input_holidays.length; i++) {
+                    if (input_holidays[i][0] != null && input_holidays[i][1] != null) {
+                        if (input_holidays[i][0] < input_holidays[i][1]) {
+                            const d_start = input_holidays[i][0];
+                            const d_end = input_holidays[i][1];
+                            holidays.push({
+                                'start': new Date(d_start.getFullYear(), d_start.getMonth(), d_start.getDate()),
+                                'end': new Date(d_end.getFullYear(), d_end.getMonth(), d_end.getDate()),
+                            })
+                        }
+                    }
+                }
+
+                const days_off = getInputDaysoff(x.elements.daysoff.value);
+                if (days_off == null) {
+                    alert('error in dates: ' + x.elements.daysoff.value);
+                    return;
+                }
+                
+                const working_days = getAllDays(year_start_date, year_end_date)
+                    .filter(isNotAHoliday, holidays)
+                    .filter(isNotADayOff, days_off);
+                // console.log(working_days);
+
+                const days_with_classes = daysWithClasses(working_days, hours);
+                // console.log(days_with_classes);
+
+                const all_classes = splitDaysWithClassesByParts(days_with_classes, holidays);
+                // console.log(all_classes);
+
+                output_div.forEach(function(el, i, output_div) {
+                    el.innerHTML = "";
+                });
+
+                let total_hours = 0;
+
+                all_classes.forEach(function(part, i, all_classes) {
+                    let arr = part;
+                    arr.forEach(function(item, j, arr) {
+                        let p = document.createElement("p");
+                        let node = document.createTextNode(formatDate(item.date) + ' часов: ' + item.hours);
+                        p.appendChild(node);
+                        output_div[i].appendChild(p);
+                    });
+
+                    const hours = arr.reduce(function(hours, current) {
+                        return hours + current.hours;
+                    }, 0);
+                    total_hours += hours;
+                    output_hours[i].innerHTML = 'Часы: ' + hours;
+                });
+
+                el_total_hours.innerHTML = 'Всего часов: ' + total_hours;
+            }
+
+        </script>
+    </body>
+</html>
