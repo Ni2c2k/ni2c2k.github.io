@@ -1,0 +1,110 @@
+<html>
+<body>
+   <h2> Create an ICS file with Skolemad-klub orders </h2>
+   <p> Insert an email message from Skolemad-klub here </p>
+   <textarea> </textarea>
+   <br/>
+   <button onclick = "parseAndDownloadIcs()"> create an ICS file </button>
+   <script type="text/javascript">
+
+        function create_ics(name, products)
+        {
+            let strings = []
+            strings.push("BEGIN:VCALENDAR");
+            strings.push("VERSION:2.0");
+            strings.push("PRODID://ni2c2k//skolemad klub");
+            
+            for (prod of products) {
+                strings.push("BEGIN:VEVENT")
+
+                let date_splitted = prod.date.split(/-/)
+                // console.log(date_splitted)
+                let formatted_date = date_splitted[2] + date_splitted[1] + date_splitted[0]
+
+                strings.push("UID:skolemad-ni2c2k-produ" + name[0] + "-" + formatted_date);
+
+                strings.push("DTSTART;VALUE=DATE:" + formatted_date);
+                strings.push("DTEND;VALUE=DATE:" + formatted_date)
+                strings.push("SUMMARY: Skolemad " + name + ". " + prod.product);
+                strings.push("END:VEVENT")
+            }
+
+            strings.push("END:VCALENDAR");
+            let result = strings.join("\r\n");
+
+            // console.log(result)
+
+            return {error: "", text: result}
+        }
+
+        function parseEmailContent(content)
+        {
+            let lines = content.split(/\r?\n/);
+            let name = "";
+            for (i in lines) {
+                if (lines[i].startsWith('Navn')) {
+                    let splitted_line = lines[i].split(/\t/);
+                    name = splitted_line[1];
+                    // console.log('name found', splitted_line[1]);
+                    lines = lines.slice(i)
+                    break;
+                }
+            }
+
+            if (name.length === 0)
+            {
+                return {error: "can\'t find a \'Navn\'", text: ""}
+            }
+
+            let products = [];
+            for (let i = 0; i < lines.length; ) {
+                if (lines[i].startsWith('Total')) {
+                    break;
+                }
+                if (lines[i].startsWith('Produkt:')) {
+                    let product_splitted = lines[i].split(/\t/);
+                    // console.log('product found', product_splitted[1]);
+                    if (lines[i + 1].startsWith('Udleveringsdato:')) {
+                        let date_splitted = lines[i + 1].split(/\t/);
+                        // console.log('date found', date_splitted[1]);
+                        products.push({product: product_splitted[1], date: date_splitted[1]})
+                        i++;
+                        continue;
+                    } else {
+                        return {error: 'can\'t find a \'Udleveringsdato:\'', text: ""}
+                    }
+                }
+
+                i++;
+            }
+
+            if (products.length === 0)
+            {
+                return {error: "no products", text: ""}
+            }
+
+            // if we are here - name and products have been found
+            // console.log(products)
+            return create_ics(name, products);
+        }
+
+      const parseAndDownloadIcs = () => {
+         const content = parseEmailContent(document.querySelector("textarea").value);
+         if (content.error.length === 0)
+         {
+            const link = document.createElement("a");
+            const file = new Blob([content.text], { type: 'text/calendar' });
+            link.href = URL.createObjectURL(file);
+            link.download = "skolemad.ics";
+            link.click();
+            URL.revokeObjectURL(link.href);
+         }
+         else
+         {
+            window.alert(content.error)  
+         }
+      };
+   </script>
+</body>
+</html>
+
