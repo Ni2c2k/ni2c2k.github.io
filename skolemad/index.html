@@ -21,6 +21,18 @@
             return `${year}${month}${day}T${hour}${minute}${second}Z`;
         }
 
+        // 05-11-2024 -> 20241105
+        // 2024-12-03T12:00:00+01:00 -> 20241203
+        function parseDate(date) {
+            let date_splitted = date.split(/-/);
+            if (2 == date_splitted[0].length) {
+                // 05-11-2024
+                return date_splitted[2] + date_splitted[1] + date_splitted[0];
+            }
+            // 2024-12-03T12:00:00+01:00
+            return date_splitted[0] + date_splitted[1] + date_splitted[2].substring(0, 2);
+        }
+
         function create_ics(name, products){
             let strings = []
             strings.push("BEGIN:VCALENDAR");
@@ -30,8 +42,7 @@
             for (prod of products) {
                 strings.push("BEGIN:VEVENT")
 
-                let date_splitted = prod.date.split(/-/)
-                let formatted_date = date_splitted[2] + date_splitted[1] + date_splitted[0]
+                const formatted_date = parseDate(prod.date);
 
                 strings.push("UID:skolemad-ni2c2k-produ" + name[0] + "-" + formatted_date);
                 strings.push("DTSTAMP:" + formatDateTime(new Date()));
@@ -41,7 +52,7 @@
                 // let next_date_str = date_splitted[2] + String(next_date.getMonth()).padStart(2, "0") + String(next_date.getDate()).padStart(2, "0");
 
                 strings.push("DTSTART;VALUE=DATE:" + formatted_date);
-                // strings.push("DTEND;VALUE=DATE:" + next_date_str);
+                // strings.push("DTEND;VALUE=DATE:" + next_date_str);   // it's not required for a full-day event
                 strings.push("SUMMARY:Skolemad " + name + ". " + prod.product);
                 strings.push("DESCRIPTION:Skolemad " + name + ". " + prod.product);
                 strings.push("TRANSP:TRANSPARENT");
@@ -82,10 +93,8 @@
                 }
                 if (lines[i].startsWith('Produkt:')) {
                     let product_splitted = lines[i].split(/\t/);
-                    // console.log('product found', product_splitted[1]);
                     if (lines[i + 1].startsWith('Udleveringsdato:')) {
                         let date_splitted = lines[i + 1].split(/\t/);
-                        // console.log('date found', date_splitted[1]);
                         products.push({product: product_splitted[1], date: date_splitted[1]})
                         i++;
                         continue;
