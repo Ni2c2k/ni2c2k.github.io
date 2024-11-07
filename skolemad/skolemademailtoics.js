@@ -1,4 +1,3 @@
-
 function pad(i) {
     return i < 10 ? `0${i}` : `${i}`;
 }
@@ -39,16 +38,12 @@ function create_ics(name, products){
         strings.push("UID:skolemad-ni2c2k-produ" + name[0] + "-" + formatted_date);
         strings.push("DTSTAMP:" + formatDateTime(new Date()));
 
-        // let next_date = new Date(date_splitted[2], date_splitted[1], date_splitted[0]);
-        // next_date.setDate(next_date.getDate() + 1);
-        // let next_date_str = date_splitted[2] + String(next_date.getMonth()).padStart(2, "0") + String(next_date.getDate()).padStart(2, "0");
-
         strings.push("DTSTART;VALUE=DATE:" + formatted_date);
         // strings.push("DTEND;VALUE=DATE:" + next_date_str);   // it's not required for a full-day event
         strings.push("SUMMARY:Skolemad " + name + ". " + prod.product);
         strings.push("DESCRIPTION:Skolemad " + name + ". " + prod.product);
         strings.push("TRANSP:TRANSPARENT");
-        strings.push("END:VEVENT")
+        strings.push("END:VEVENT");
     }
 
     strings.push("END:VCALENDAR");
