@@ -1,0 +1,16 @@
+{
+  "name": "skolemad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cmd.js",
+  "scripts": {
+    "test": "node --test --test-reporter spec tests/*.js",
+    "start": "./node_modules/http-server/bin/http-server -o .."
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
