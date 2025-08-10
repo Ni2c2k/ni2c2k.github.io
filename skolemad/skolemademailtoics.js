@@ -14,9 +14,14 @@ function formatDateTime(date) {
 
 // 05-11-2024 -> 20241105
 // 2024-12-03T12:00:00+01:00 -> 20241203
+// 15-08-2025 12:00 -> 20250815
 function parseDate(date) {
+    let date_splitted_by_space = date.split(/\s/);
+    if (2 == date_splitted_by_space.length) { // date was in following format 15-08-2025 12:00
+        date = date_splitted_by_space[0];
+    }
     let date_splitted = date.split(/-/);
-    if (2 == date_splitted[0].length) {
+    if (2 == date_splitted[0].length) { // the first number is a date
         // 05-11-2024
         return date_splitted[2] + date_splitted[1] + date_splitted[0];
     }
