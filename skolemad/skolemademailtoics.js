@@ -64,7 +64,7 @@ export function skolemademailToIcs(content)
     let lines = content.split(/\r?\n/);
     let name = "";
     for (let i in lines) {
-        if (lines[i].startsWith('Navn')) {
+        if (lines[i].trimStart().startsWith('Navn')) {
             let splitted_line = lines[i].split(/\t/);
             name = splitted_line[1];
             // console.log('name found', splitted_line[1]);

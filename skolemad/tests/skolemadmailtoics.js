@@ -22,6 +22,24 @@ Pris: \t27.00 kr.\r\n`;
    assert.notEqual(-1, result.text.search("DTSTART;VALUE=DATE:20241121"));
 });
 
+test("perfectInputData_the_first_line_with_name_with_spaces", () => {
+    const emailText = `
+ Navn: \tTest Name\r\n\
+Ordre nummer: \t25693434\r\n\
+Produkt: \tLasagne med kødsovs af grønt og hjerter. Hertil frugt\r\n\
+Udleveringsdato: \t2024-11-20T12:00:00+01:00\r\n\
+Antal: \t1\r\n\
+Pris: \t27.00 kr.\r\n\
+Produkt: \tStegt kyllingelår med kartofler, tomater og krydderurtedressing\r\n\
+Udleveringsdato: \t2024-11-21T12:00:00+01:00\r\n\
+Antal: \t1\r\n\
+Pris: \t27.00 kr.\r\n`;
+   const result = skolemademailToIcs(emailText);
+   assert.equal(result.error, '');
+   assert.notEqual(-1, result.text.search("DTSTART;VALUE=DATE:20241120"));
+   assert.notEqual(-1, result.text.search("DTSTART;VALUE=DATE:20241121"));
+});
+
 test("perfectInputData_date_format_2", () => {
     const emailText = `
 Betalingen vedrører følgende køb:   \r\n\
